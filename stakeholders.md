@@ -1,4 +1,4 @@
-Stakeholders:
-Teaching team (profs, TA)
-Community - other students in Programming for Policymakers, peers
+Stakeholders:<br>
+Teaching team (profs, TA)<br>
+Community - other students in Programming for Policymakers, peers<br>
 Harvard Kennedy School
