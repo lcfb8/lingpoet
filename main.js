@@ -1,7 +1,7 @@
 d3.text("nor-eng.csv", function(data) {
     var parsedCSV = d3.csv.parseRows(data);
 
-    var container = d3.select("#nor-eng-table")
+    var container = d3.select("#norengtable")
         .append("table")
 
         .selectAll("tr")
