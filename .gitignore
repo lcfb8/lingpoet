@@ -1,0 +1,12 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Local data + databases
+data/
+*.sqlite
+*.db
+
+# macOS
+.DS_Store
