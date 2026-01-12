@@ -5,3 +5,6 @@ data/
 *.sqlite
 *.db
 .DS_Store
+node_modules
+*.log
+.vscode/
