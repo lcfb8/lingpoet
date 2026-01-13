@@ -59,3 +59,32 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   const rows = await search("");
   renderClusters(rows);
 });
+
+d3.csv("nor-eng.csv", function(data) {
+    // Create a table to display the data
+    var table = d3.select("#nor-eng").append("table");
+    
+    // Create header row
+    var thead = table.append("thead").append("tr");
+    thead.selectAll("th")
+        .data(d3.keys(data[0]))
+        .enter()
+        .append("th")
+        .text(function(d) { return d; });
+    
+    // Create body rows
+    var tbody = table.append("tbody");
+    tbody.selectAll("tr")
+        .data(data)
+        .enter()
+        .append("tr")
+        .selectAll("td")
+        .data(function(row) {
+            return d3.keys(data[0]).map(function(key) {
+                return row[key];
+            });
+        })
+        .enter()
+        .append("td")
+        .text(function(d) { return d; });
+});
