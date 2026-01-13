@@ -1,0 +1,201 @@
+/* 1) Reset / predictable sizing */
+body {
+  margin: 0;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+/* “Poetic” design tokens (colors, spacing, widths) */
+:root{
+  /* palette */
+  --paper: #fbfaf7;
+  --ink: #161616;
+  --muted: #6a6a6a;
+  --rule: rgba(22,22,22,.12);
+  --accent: #2f5cff;
+  /* layout */
+  --content: 68ch;
+  --content-wide: 92ch;
+  --radius: 16px;
+  /* spacing scale */
+  --s1: 6px;
+  --s2: 10px;
+  --s3: 16px;
+  --s4: 24px;
+  --s5: 36px;
+  --s6: 56px;
+}
+
+/* Typography system (serif for poems, sans for UI) */
+:root{
+  --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+body{
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+}
+h1, h2, h3{
+  font-family: var(--serif);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0 0 var(--s3);
+}
+p{ margin: 0 0 var(--s3); color: var(--ink); }
+small, .muted{ color: var(--muted); }
+a{
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+a:hover{ border-bottom-color: var(--ink); }
+
+
+
+/* ------------------------------------------------- */
+/* Opening Section */
+.opening-content {
+  width: min(92ch, calc(100% - 3rem));
+  margin-left: 8rem;
+  padding-top: 2rem;
+}
+.opening-section {
+  padding: clamp(1rem, 5vw, 3rem) 0;
+  background: var(--paper);
+}
+.opening-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  font-size: clamp(1rem, 5vw, 3rem);
+  margin: 0 0 var(--s4);
+  position: relative;
+  display: inline-block; /* so accent hugs the title */
+}
+/* Watercolor/accent shape behind the title */
+.opening-title {
+  position: relative;
+  display: inline-block;   /* IMPORTANT */
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 1.02;
+  margin-bottom: var(--s4);
+  z-index: 1;              /* keeps text above blob */
+}
+/* Watercolor/accent shape */
+.opening-title::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -0.5em;
+  top: 0em;
+  width: 6.5em;
+  height: 1.2em;
+  /* shape */
+  border-radius: 999px;
+  transform: rotate(-4deg);
+  /* watercolor effect */
+  background:
+    radial-gradient(60% 80% at 30% 40%, rgba(77, 152, 255, 0.55), transparent 70%),
+    radial-gradient(70% 90% at 70% 60%, rgba(77, 152, 255, 0.35), transparent 72%),
+    radial-gradient(90% 120% at 55% 50%, rgba(77, 152, 255, 0.25), transparent 75%);
+}
+/* Style the opening content */
+.about-content {
+  max-width: 68ch;
+  font-size: 1rem;
+  line-height: 1.5; /* airy like Rupi page */
+  color: var(--ink);
+}
+.about-content p {
+  margin: 0 0 var(--s3);
+}
+.opening-section + hr {
+  margin: 0;
+  border: none;
+  border-top: 1px solid var(--rule);
+}
+
+/* ------------------------------------------------- */
+/* Split layout Lidya: image left, text right */
+.split-section-lidya {
+  background: var(--paper, #6a6a6a);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0vh;
+}
+
+/* Left side (image panel) */
+.split-media-lidya {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1rem;
+}
+.split-media-lidya img {
+  width: min(360px, 80%);
+  height: auto;
+  border-radius: 4%;
+}
+
+/* Right side (text panel) */
+.split-content-lidya {
+  background: var(--paper, #6a6a6a);
+  padding: 4rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.split-content-lidya h2 {
+  margin-top: 0;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.1;
+}
+.split-content-lidya p {
+  max-width: 60ch;
+  line-height: 1.75;
+}
+
+
+/* ------------------------------------------------- */
+/* Split layout Lidya: image right, text left */
+.split-section-elsa {
+  background: var(--paper, #6a6a6a);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0vh;
+}
+
+/* Left side (text panel) */
+.split-content-elsa {
+  background: var(--paper, #6a6a6a);
+  padding: 4rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.split-content-elsa h2 {
+  margin-top: 0;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.1;
+}
+.split-content-elsa p {
+  max-width: 60ch;
+  line-height: 1.75;
+}
+
+/* Right side (image panel) */
+.split-media-elsa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1rem;
+}
+.split-media-elsa img {
+  width: min(360px, 80%);
+  height: auto;
+  border-radius: 4%;
+}
