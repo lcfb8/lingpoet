@@ -1,10 +1,4 @@
 /* 1) Reset / predictable sizing */
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
-html { -webkit-text-size-adjust: 100%; }
-
 body {
   margin: 0;
   line-height: 1.6;
@@ -63,6 +57,30 @@ a{
   border-bottom: 1px solid var(--rule);
 }
 a:hover{ border-bottom-color: var(--ink); }
+
+
+
+/* ------------------------------------------------- */
+/* Opening Section */
+.opening-content {
+  width: min(92ch, calc(100% - 3rem));
+  margin-left: 8rem;
+  padding-top: 2rem;
+}
+.opening-section {
+  padding: clamp(1rem, 5vw, 3rem) 0;
+  background: var(--paper);
+}
+.opening-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  font-size: clamp(1rem, 5vw, 3rem);
+  margin: 0 0 var(--s4);
+  position: relative;
+  display: inline-block; /* so accent hugs the title */
+}
 
 /* ------------------------------------------------- */
 /* Split layout Lidya: image left, text right */
