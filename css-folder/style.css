@@ -47,6 +47,9 @@ body{
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16px;
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: var(--s5) var(--s3) var(--s6);
 }
 
 h1, h2, h3{
@@ -54,6 +57,7 @@ h1, h2, h3{
   letter-spacing: -0.01em;
   line-height: 1.15;
   margin: 0 0 var(--s3);
+  text-align: center;
 }
 
 p{ margin: 0 0 var(--s3); color: var(--ink); }
