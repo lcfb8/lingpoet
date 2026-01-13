@@ -1,0 +1,114 @@
+[
+  {
+    "id": 1,
+    "key": "gift",
+    "kind": "orthographic",
+    "entries": [
+      {
+        "form": "gift",
+        "lang": "en",
+        "ipa": "ɡɪft",
+        "gloss": "present",
+        "etymology": ""
+      },
+      {
+        "form": "gift",
+        "lang": "no",
+        "ipa": "jɪft",
+        "gloss": "married",
+        "etymology": ""
+      },
+      {
+        "form": "Gift",
+        "lang": "de",
+        "ipa": "ɡɪft",
+        "gloss": "poison",
+        "etymology": ""
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "key": "pain",
+    "kind": "orthographic",
+    "entries": [
+      {
+        "form": "pain",
+        "lang": "en",
+        "ipa": "peɪn",
+        "gloss": "suffering",
+        "etymology": ""
+      },
+      {
+        "form": "pain",
+        "lang": "fr",
+        "ipa": "pɛ̃",
+        "gloss": "bread",
+        "etymology": ""
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "key": "pan",
+    "kind": "orthographic",
+    "entries": [
+      {
+        "form": "pan",
+        "lang": "en",
+        "ipa": "pæn",
+        "gloss": "cooking pan",
+        "etymology": ""
+      },
+      {
+        "form": "pan",
+        "lang": "es",
+        "ipa": "pan",
+        "gloss": "bread",
+        "etymology": ""
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "key": "bra",
+    "kind": "orthographic",
+    "entries": [
+      {
+        "form": "bra",
+        "lang": "en",
+        "ipa": "bræ",
+        "gloss": "brassiere",
+        "etymology": ""
+      },
+      {
+        "form": "bra",
+        "lang": "sv",
+        "ipa": "brɑː",
+        "gloss": "good",
+        "etymology": ""
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "key": "ɡɪft",
+    "kind": "phonetic",
+    "entries": [
+      {
+        "form": "gift",
+        "lang": "en",
+        "ipa": "ɡɪft",
+        "gloss": "present",
+        "etymology": ""
+      },
+      {
+        "form": "Gift",
+        "lang": "de",
+        "ipa": "ɡɪft",
+        "gloss": "poison",
+        "etymology": ""
+      }
+    ]
+  }
+]
