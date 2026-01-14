@@ -75,9 +75,12 @@ def search():
         SELECT match_key, languages, gloss_overlap, entries
         FROM spelling_matches
         WHERE match_key LIKE ?
-        ORDER BY languages DESC
+        ORDER BY 
+            CASE WHEN match_key = ? THEN 0 ELSE 1 END,
+            length(match_key),
+            languages DESC
         LIMIT 100
-    """, (f"%{query}%",))
+    """, (f"%{query}%", query))
     
     results = []
     selected = set(languages) if languages else None
@@ -124,9 +127,12 @@ def search_ipa():
         SELECT match_key, languages, gloss_overlap, entries
         FROM pronunciation_matches
         WHERE match_key LIKE ?
-        ORDER BY languages DESC
+        ORDER BY 
+            CASE WHEN match_key = ? THEN 0 ELSE 1 END,
+            length(match_key),
+            languages DESC
         LIMIT 100
-    """, (f"%{norm}%",))
+    """, (f"%{norm}%", norm))
     
     results = []
     selected = set(languages) if languages else None

@@ -20,15 +20,15 @@ def gloss_distance(entries):
     overlaps = []
     for left, right in combinations(entries, 2):
         if not left["tokens"] or not right["tokens"]:
-            return 1.0
+            continue
         inter = len(left["tokens"] & right["tokens"])
         union = len(left["tokens"] | right["tokens"])
         if union == 0:
             continue
         overlaps.append(inter / union)
     if not overlaps:
-        return 1.0
-    return max(overlaps)
+        return 0.0  # No overlap means different meanings
+    return sum(overlaps) / len(overlaps)  # Average overlap instead of max
 
 IPA_STRIP = re.compile(r"[\[\]/ˈˌ\s]")
 IPA_MAP = {
