@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LingPoet</title>
     <link rel="stylesheet" href="style-behind-the-words.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
   </head>
 
   <body>
@@ -46,7 +49,7 @@
         <div class="hero__overlay" aria-hidden="true"></div>
 
         <div class="hero__content">
-          <p class="hero__kicker">A quiet place for language.</p>
+          <p class="hero__kicker">A quiet and playful place for language.</p>
           <h1 class="hero__title">Words, held gently.</h1>
 
           <div class="hero__actions">
@@ -55,6 +58,81 @@
           </div>
         </div>
       </section>
+
+    <!-- Thesis / Concept statement -->
+      <section class="thesis">
+        <p><em>
+        We're not interested in words with a similar etymological root or loan words. <br>
+        We're looking for the weird words - the ones that are the same purely through coincidence.
+        </em></p>
+      </section>
+
+    <!-- Behind the Words (data + method) -->
+      <section class="btw" aria-labelledby="btw-title">
+        <div class="btw__inner">
+          <header class="btw__header">
+            <h2 id="btw-title">Behind the Words</h2>
+            <p class="btw__lede">
+            Not a dictionary. Not a genealogy of language.
+            We collect coincidences: words that look alike without borrowing, shared roots, or historical handshakes.
+            Here’s where the data comes from, how we gather it, and how we keep it clean enough to play with.
+            </p>
+          </header>
+
+        <div class="btw__grid">
+          <article class="card">
+            <h3 class="card__title">Sources</h3>
+            <p class="card__text">
+            A small map of where our word forms and metadata come from — public, cited, and versioned.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3 class="card__title">Retrieval</h3>
+            <p class="card__text">
+            How we collect, normalize, and deduplicate entries before they enter the studio.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3 class="card__title">Storage</h3>
+            <p class="card__text">
+            How we store the dataset so it’s fast to explore, transparent to audit, and easy to update.
+            </p>
+          </article>
+
+          <article class="card card--wide">
+            <h3 class="card__title">Assumptions & caveats</h3>
+            <p class="card__text">
+            What we exclude (loanwords, shared roots), what “coincidence” means for us, and the edge cases we keep an eye on.
+            </p>
+          </article>
+        </div>
+
+        <div class="btw__cta">
+          <div class="btw__cta-text">
+            <h3>Dare to Play?</h3>
+            <p>Dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy.</p>
+          </div>
+        <a class="btw__button" href="behind-the-words/index.html">Open Words Studio →</a>
+        </div>
+
+        </div>
+      </section>
+
     </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p class="site-footer__left">
+          © 2026 LingPoet
+        </p>
+
+        <p class="site-footer__right">
+          Created at Harvard Kennedy School
+        </p>
+      </div>
+    </footer>
+
   </body>
 </html>
