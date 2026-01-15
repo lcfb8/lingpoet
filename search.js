@@ -37,10 +37,10 @@ async function initDatabase() {
             locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
         });
 
-        // Load the database file
-        const response = await fetch('data/coincidences.db');
+        // Load the database file from S3
+        const response = await fetch('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db');
         if (!response.ok) {
-            throw new Error('Database file not found. Please ensure data/coincidences.db exists.');
+            throw new Error('Database file not found. Please check the S3 URL.');
         }
 
         const buffer = await response.arrayBuffer();
