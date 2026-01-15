@@ -2,6 +2,9 @@ let db = null;
 let currentTab = 'spelling';
 let searchTimeout;
 let selectedLanguages = [];
+let showAllLanguages = false;
+let allLanguagesData = [];  // { lang, count } sorted by count desc
+const TOP_LANGUAGES_COUNT = 570;
 
 // IPA normalization (same logic as Python version)
 const IPA_MAP = {
@@ -63,7 +66,7 @@ async function loadLanguages() {
         if (!db) return;
 
         const result = db.exec("SELECT entries FROM spelling_matches");
-        const langs = new Set();
+        const langCounts = new Map();  // lang -> count of coincidences
 
         if (result.length > 0) {
             const rows = result[0].values;
@@ -72,7 +75,7 @@ async function loadLanguages() {
                     const entries = JSON.parse(row[0]);
                     for (const entry of entries) {
                         if (entry.lang) {
-                            langs.add(entry.lang);
+                            langCounts.set(entry.lang, (langCounts.get(entry.lang) || 0) + 1);
                         }
                     }
                 } catch (e) {
@@ -81,24 +84,53 @@ async function loadLanguages() {
             }
         }
 
-        const container = document.getElementById('languageFilter');
-        const sortedLangs = Array.from(langs).sort();
+        // Sort by count descending, then alphabetically
+        allLanguagesData = Array.from(langCounts.entries())
+            .map(([lang, count]) => ({ lang, count }))
+            .sort((a, b) => b.count - a.count || a.lang.localeCompare(b.lang));
 
-        if (sortedLangs.length === 0) {
-            container.innerHTML = '<em>No languages found</em>';
+        if (allLanguagesData.length === 0) {
+            document.getElementById('languageFilter').innerHTML = '<em>No languages found</em>';
             return;
         }
 
-        container.innerHTML = sortedLangs.map(lang => `
-            <label>
-                <input type="checkbox" value="${lang}" onchange="toggleLanguage(this)">
-                ${lang}
-            </label>
-        `).join('');
+        renderLanguageFilter();
     } catch (error) {
         console.error('Error loading languages:', error);
         document.getElementById('languageFilter').innerHTML = '<em>Error loading languages</em>';
     }
+}
+
+function renderLanguageFilter() {
+    const container = document.getElementById('languageFilter');
+    const langsToShow = showAllLanguages 
+        ? allLanguagesData 
+        : allLanguagesData.slice(0, TOP_LANGUAGES_COUNT);
+    
+    // Sort displayed languages alphabetically for easier browsing
+    const sortedLangs = [...langsToShow].sort((a, b) => a.lang.localeCompare(b.lang));
+
+    container.innerHTML = sortedLangs.map(({ lang }) => `
+        <label>
+            <input type="checkbox" value="${escapeHtml(lang)}" 
+                   onchange="toggleLanguage(this)"
+                   ${selectedLanguages.includes(lang) ? 'checked' : ''}>
+            ${escapeHtml(lang)}
+        </label>
+    `).join('');
+}
+
+function toggleAllLanguages() {
+    showAllLanguages = !showAllLanguages;
+    const btn = document.getElementById('toggleAllLangsBtn');
+    if (showAllLanguages) {
+        btn.textContent = `Show top ${TOP_LANGUAGES_COUNT} languages`;
+        btn.classList.add('showing-all');
+    } else {
+        btn.textContent = `Show all ${allLanguagesData.length} languages`;
+        btn.classList.remove('showing-all');
+    }
+    renderLanguageFilter();
 }
 
 function toggleLanguage(checkbox) {
