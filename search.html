@@ -16,14 +16,14 @@
         <div class="search-section">
             <div class="search-tabs">
                 <button class="tab-button active" onclick="switchTab('spelling', this)">Search by Spelling</button>
-                <button class="tab-button" onclick="switchTab('ipa', this)">Search by Pronunciation (IPA)</button>
+                <button class="tab-button" onclick="switchTab('ipa', this)">Search by IPA Pronunciation (beta)</button>
             </div>
 
             <input type="text" id="searchInput" placeholder="Type a word to find coincidences..." onkeyup="debounceSearch()">
 
             <div class="language-filter-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <strong>Filter by languages (top ~500 languages by number of coincidences):</strong>
+                    <strong>Filter by language (top 570 languages by number of coincidences):</strong>
                     <button id="toggleAllLangsBtn" class="toggle-langs-btn" onclick="toggleAllLanguages()">Search all 2446 languages</button>
                 </div>
                 
