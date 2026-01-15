@@ -13,7 +13,7 @@ body {
     background: white;
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    overflow: hidden;
+    overflow: visible;
 }
 
 header {
@@ -30,6 +30,8 @@ header p { font-size: 1.1em; opacity: 0.9; }
     padding: 30px 20px;
     background: #f8f9fa;
     border-bottom: 1px solid #e0e0e0;
+    overflow: visible;
+    position: relative;
 }
 
 .search-tabs {
@@ -117,6 +119,220 @@ input[type="text"]:focus {
 .toggle-langs-btn.showing-all {
     background: #667eea;
     color: white;
+}
+
+/* Language Dropdown Styles */
+.language-filter-section {
+    position: relative;
+    overflow: visible;
+}
+
+.language-dropdown {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+}
+
+.dropdown-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.dropdown-trigger:hover {
+    border-color: #667eea;
+}
+
+.dropdown-placeholder {
+    color: #666;
+}
+
+.dropdown-placeholder.has-selection {
+    color: #333;
+    font-weight: 500;
+}
+
+.dropdown-arrow {
+    color: #666;
+    font-size: 0.8em;
+    transition: transform 0.2s;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #667eea;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.dropdown-menu.open {
+    display: flex;
+}
+
+.dropdown-trigger.open {
+    border-color: #667eea;
+    border-radius: 6px 6px 0 0;
+}
+
+.dropdown-trigger.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-search {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.dropdown-search input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95em;
+}
+
+.dropdown-search input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.dropdown-list {
+    overflow-y: auto;
+    max-height: 300px;
+    min-height: 100px;
+    padding: 5px 0;
+    flex-shrink: 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.dropdown-item:hover {
+    background: #f0f0f0;
+}
+
+.dropdown-item.selected {
+    background: #e8edff;
+}
+
+.dropdown-item input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.dropdown-item label {
+    flex: 1;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.dropdown-item .lang-count {
+    color: #999;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.dropdown-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+    border-radius: 0 0 4px 4px;
+    flex-shrink: 0;
+}
+
+.dropdown-clear, .dropdown-apply {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+
+.dropdown-clear {
+    background: white;
+    border: 1px solid #ddd;
+    color: #666;
+}
+
+.dropdown-clear:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+}
+
+.dropdown-apply {
+    background: #667eea;
+    border: none;
+    color: white;
+}
+
+.dropdown-apply:hover {
+    background: #5a6fd6;
+}
+
+.dropdown-no-results {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+}
+
+/* Selected languages tags */
+.selected-languages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.selected-languages:empty {
+    display: none;
+}
+
+.language-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: #667eea;
+    color: white;
+    border-radius: 15px;
+    font-size: 0.85em;
+}
+
+.language-tag .remove-tag {
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+}
+
+.language-tag .remove-tag:hover {
+    opacity: 1;
 }
 
 .results-section { padding: 20px; }

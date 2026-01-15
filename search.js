@@ -2,8 +2,10 @@ let db = null;
 let currentTab = 'spelling';
 let searchTimeout;
 let selectedLanguages = [];
+let pendingLanguages = [];  // Languages selected in dropdown but not yet applied
 let showAllLanguages = false;
 let allLanguagesData = [];  // { lang, count } sorted by count desc
+let dropdownOpen = false;
 const TOP_LANGUAGES_COUNT = 570;
 
 // IPA normalization (same logic as Python version)
@@ -90,34 +92,145 @@ async function loadLanguages() {
             .sort((a, b) => b.count - a.count || a.lang.localeCompare(b.lang));
 
         if (allLanguagesData.length === 0) {
-            document.getElementById('languageFilter').innerHTML = '<em>No languages found</em>';
+            document.getElementById('languageList').innerHTML = '<div class="dropdown-no-results">No languages found</div>';
             return;
         }
 
-        renderLanguageFilter();
+        renderLanguageDropdown();
+        updateDropdownPlaceholder();
     } catch (error) {
         console.error('Error loading languages:', error);
-        document.getElementById('languageFilter').innerHTML = '<em>Error loading languages</em>';
+        document.getElementById('languageList').innerHTML = '<div class="dropdown-no-results">Error loading languages</div>';
     }
 }
 
-function renderLanguageFilter() {
-    const container = document.getElementById('languageFilter');
+function renderLanguageDropdown(filter = '') {
+    const container = document.getElementById('languageList');
     const langsToShow = showAllLanguages 
         ? allLanguagesData 
         : allLanguagesData.slice(0, TOP_LANGUAGES_COUNT);
     
-    // Sort displayed languages alphabetically for easier browsing
-    const sortedLangs = [...langsToShow].sort((a, b) => a.lang.localeCompare(b.lang));
+    // Sort displayed languages alphabetically
+    let sortedLangs = [...langsToShow].sort((a, b) => a.lang.localeCompare(b.lang));
+    
+    // Filter by search text
+    if (filter) {
+        const lowerFilter = filter.toLowerCase();
+        sortedLangs = sortedLangs.filter(({ lang }) => 
+            lang.toLowerCase().includes(lowerFilter)
+        );
+    }
 
-    container.innerHTML = sortedLangs.map(({ lang }) => `
-        <label>
-            <input type="checkbox" value="${escapeHtml(lang)}" 
-                   onchange="toggleLanguage(this)"
-                   ${selectedLanguages.includes(lang) ? 'checked' : ''}>
-            ${escapeHtml(lang)}
-        </label>
+    if (sortedLangs.length === 0) {
+        container.innerHTML = '<div class="dropdown-no-results">No languages match your search</div>';
+        return;
+    }
+
+    container.innerHTML = sortedLangs.map(({ lang, count }) => `
+        <div class="dropdown-item ${pendingLanguages.includes(lang) ? 'selected' : ''}" 
+             onclick="toggleDropdownItem('${escapeHtml(lang).replace(/'/g, "\\'")}')">
+            <input type="checkbox" 
+                   ${pendingLanguages.includes(lang) ? 'checked' : ''}
+                   onclick="event.stopPropagation(); toggleDropdownItem('${escapeHtml(lang).replace(/'/g, "\\'")}')">
+            <label>${escapeHtml(lang)}</label>
+            <span class="lang-count">${count.toLocaleString()}</span>
+        </div>
     `).join('');
+}
+
+function toggleDropdown() {
+    dropdownOpen = !dropdownOpen;
+    const menu = document.getElementById('dropdownMenu');
+    const trigger = document.querySelector('.dropdown-trigger');
+    
+    if (dropdownOpen) {
+        menu.classList.add('open');
+        trigger.classList.add('open');
+        // Copy current selection to pending
+        pendingLanguages = [...selectedLanguages];
+        renderLanguageDropdown();
+        // Focus the search input
+        setTimeout(() => {
+            document.getElementById('languageSearchInput').focus();
+        }, 100);
+    } else {
+        menu.classList.remove('open');
+        trigger.classList.remove('open');
+        document.getElementById('languageSearchInput').value = '';
+    }
+}
+
+function closeDropdown() {
+    if (dropdownOpen) {
+        dropdownOpen = false;
+        document.getElementById('dropdownMenu').classList.remove('open');
+        document.querySelector('.dropdown-trigger').classList.remove('open');
+        document.getElementById('languageSearchInput').value = '';
+    }
+}
+
+function toggleDropdownItem(lang) {
+    if (pendingLanguages.includes(lang)) {
+        pendingLanguages = pendingLanguages.filter(l => l !== lang);
+    } else {
+        pendingLanguages.push(lang);
+    }
+    renderLanguageDropdown(document.getElementById('languageSearchInput').value);
+}
+
+function filterLanguageList() {
+    const filter = document.getElementById('languageSearchInput').value;
+    renderLanguageDropdown(filter);
+}
+
+function clearLanguageSelection() {
+    pendingLanguages = [];
+    renderLanguageDropdown(document.getElementById('languageSearchInput').value);
+}
+
+function applyLanguageFilter() {
+    selectedLanguages = [...pendingLanguages];
+    closeDropdown();
+    updateDropdownPlaceholder();
+    renderSelectedTags();
+    performSearch();
+}
+
+function updateDropdownPlaceholder() {
+    const placeholder = document.getElementById('dropdownPlaceholder');
+    if (selectedLanguages.length === 0) {
+        placeholder.textContent = 'Select languages...';
+        placeholder.classList.remove('has-selection');
+    } else if (selectedLanguages.length === 1) {
+        placeholder.textContent = selectedLanguages[0];
+        placeholder.classList.add('has-selection');
+    } else {
+        placeholder.textContent = `${selectedLanguages.length} languages selected`;
+        placeholder.classList.add('has-selection');
+    }
+}
+
+function renderSelectedTags() {
+    const container = document.getElementById('selectedLanguagesTags');
+    if (selectedLanguages.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = selectedLanguages.map(lang => `
+        <span class="language-tag">
+            ${escapeHtml(lang)}
+            <span class="remove-tag" onclick="removeLanguageTag('${escapeHtml(lang).replace(/'/g, "\\'")}')">×</span>
+        </span>
+    `).join('');
+}
+
+function removeLanguageTag(lang) {
+    selectedLanguages = selectedLanguages.filter(l => l !== lang);
+    pendingLanguages = pendingLanguages.filter(l => l !== lang);
+    updateDropdownPlaceholder();
+    renderSelectedTags();
+    performSearch();
 }
 
 function toggleAllLanguages() {
@@ -127,19 +240,13 @@ function toggleAllLanguages() {
         btn.textContent = `Show top ${TOP_LANGUAGES_COUNT} languages`;
         btn.classList.add('showing-all');
     } else {
-        btn.textContent = `Show all ${allLanguagesData.length} languages`;
+        btn.textContent = `Search all ${allLanguagesData.length} languages`;
         btn.classList.remove('showing-all');
     }
-    renderLanguageFilter();
-}
-
-function toggleLanguage(checkbox) {
-    if (checkbox.checked) {
-        selectedLanguages.push(checkbox.value);
-    } else {
-        selectedLanguages = selectedLanguages.filter(l => l !== checkbox.value);
+    // Re-render dropdown if open
+    if (dropdownOpen) {
+        renderLanguageDropdown(document.getElementById('languageSearchInput').value);
     }
-    performSearch();
 }
 
 function switchTab(tab, button) {
@@ -264,3 +371,11 @@ function escapeHtml(text) {
 
 // Initialize when page loads
 window.addEventListener('DOMContentLoaded', initDatabase);
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('languageDropdown');
+    if (dropdown && !dropdown.contains(event.target) && dropdownOpen) {
+        closeDropdown();
+    }
+});
