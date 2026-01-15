@@ -100,7 +100,12 @@ input[type="text"]:focus {
 
 .language-filter input { display: none; }
 
-.toggle-langs-btn {
+.lang-mode-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.lang-mode-btn {
     padding: 6px 12px;
     font-size: 0.85em;
     border: 1px solid #667eea;
@@ -111,12 +116,11 @@ input[type="text"]:focus {
     transition: all 0.2s;
 }
 
-.toggle-langs-btn:hover {
-    background: #667eea;
-    color: white;
+.lang-mode-btn:hover {
+    background: #e8edff;
 }
 
-.toggle-langs-btn.showing-all {
+.lang-mode-btn.active {
     background: #667eea;
     color: white;
 }

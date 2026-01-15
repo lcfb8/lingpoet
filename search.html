@@ -22,9 +22,13 @@
             <input type="text" id="searchInput" placeholder="Type a word to find coincidences..." onkeyup="debounceSearch()">
 
             <div class="language-filter-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <strong>Filter by language (top 570 languages by number of coincidences):</strong>
-                    <button id="toggleAllLangsBtn" class="toggle-langs-btn" onclick="toggleAllLanguages()">Search all 2446 languages</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                    <strong id="languageFilterLabel">Filter by language (top 120 languages by number of coincidences):</strong>
+                    <div class="lang-mode-buttons">
+                        <button id="langMode-top120" class="lang-mode-btn active" onclick="setLanguageMode('top120')">Top 120</button>
+                        <button id="langMode-top500" class="lang-mode-btn" onclick="setLanguageMode('top500')">Top 500</button>
+                        <button id="langMode-all" class="lang-mode-btn" onclick="setLanguageMode('all')">All 2446 languages</button>
+                    </div>
                 </div>
                 
                 <!-- Multi-select dropdown -->
