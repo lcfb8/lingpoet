@@ -3,10 +3,11 @@ let currentTab = 'spelling';
 let searchTimeout;
 let selectedLanguages = [];
 let pendingLanguages = [];  // Languages selected in dropdown but not yet applied
-let showAllLanguages = false;
+let languageMode = 'top120';  // 'top120', 'top500', or 'all'
 let allLanguagesData = [];  // { lang, count } sorted by count desc
 let dropdownOpen = false;
-const TOP_LANGUAGES_COUNT = 570;
+const TOP_120_COUNT = 120;
+const TOP_500_COUNT = 500;
 
 // IPA normalization (same logic as Python version)
 const IPA_MAP = {
@@ -106,9 +107,15 @@ async function loadLanguages() {
 
 function renderLanguageDropdown(filter = '') {
     const container = document.getElementById('languageList');
-    const langsToShow = showAllLanguages 
-        ? allLanguagesData 
-        : allLanguagesData.slice(0, TOP_LANGUAGES_COUNT);
+    let langsToShow;
+    
+    if (languageMode === 'all') {
+        langsToShow = allLanguagesData;
+    } else if (languageMode === 'top500') {
+        langsToShow = allLanguagesData.slice(0, TOP_500_COUNT);
+    } else {
+        langsToShow = allLanguagesData.slice(0, TOP_120_COUNT);
+    }
     
     // Sort displayed languages alphabetically
     let sortedLangs = [...langsToShow].sort((a, b) => a.lang.localeCompare(b.lang));
@@ -233,16 +240,25 @@ function removeLanguageTag(lang) {
     performSearch();
 }
 
-function toggleAllLanguages() {
-    showAllLanguages = !showAllLanguages;
-    const btn = document.getElementById('toggleAllLangsBtn');
-    if (showAllLanguages) {
-        btn.textContent = `Show top ${TOP_LANGUAGES_COUNT} languages`;
-        btn.classList.add('showing-all');
+function setLanguageMode(mode) {
+    languageMode = mode;
+    
+    // Update button states
+    document.querySelectorAll('.lang-mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById(`langMode-${mode}`).classList.add('active');
+    
+    // Update the label text
+    const label = document.getElementById('languageFilterLabel');
+    if (mode === 'all') {
+        label.textContent = `Filter by language (all ${allLanguagesData.length} languages):`;
+    } else if (mode === 'top500') {
+        label.textContent = `Filter by language (top 500 languages by coincidences):`;
     } else {
-        btn.textContent = `Search all ${allLanguagesData.length} languages`;
-        btn.classList.remove('showing-all');
+        label.textContent = `Filter by language (top 120 languages by coincidences):`;
     }
+    
     // Re-render dropdown if open
     if (dropdownOpen) {
         renderLanguageDropdown(document.getElementById('languageSearchInput').value);
@@ -328,6 +344,14 @@ async function searchDatabase(query) {
             console.error('Error parsing entry:', e);
         }
     }
+
+    // Sort results: exact matches first, then by number of languages
+    results.sort((a, b) => {
+        const aExact = a.match_key === searchKey ? 0 : 1;
+        const bExact = b.match_key === searchKey ? 0 : 1;
+        if (aExact !== bExact) return aExact - bExact;
+        return b.languages - a.languages;
+    });
 
     return results;
 }
