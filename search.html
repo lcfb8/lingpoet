@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LingPoet - Word Coincidences</title>
+    <link rel="stylesheet" href="search.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 LingPoet</h1>
+            <p>Find words that coincidentally match across languages</p>
+        </header>
+
+        <!-- Mode Tabs -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" onclick="switchMode('search', this)">🔍 Search Words</button>
+            <button class="mode-tab" onclick="switchMode('explore', this)">🌐 Explore Languages</button>
+        </div>
+
+        <!-- Search Mode -->
+        <div id="searchMode" class="mode-content">
+            <div class="search-section">
+            <div class="search-tabs">
+                <button class="tab-button active" onclick="switchTab('spelling', this)">Search by Spelling</button>
+                <button class="tab-button" onclick="switchTab('ipa', this)">Search by IPA Pronunciation (beta)</button>
+            </div>
+
+            <input type="text" id="searchInput" placeholder="Type a word to find coincidences..." onkeyup="debounceSearch()">
+
+            <div class="language-filter-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                    <strong id="languageFilterLabel">Filter by language (top 120 languages by number of coincidences):</strong>
+                    <div class="lang-mode-buttons">
+                        <button id="langMode-top120" class="lang-mode-btn active" onclick="setLanguageMode('top120')">Top 120</button>
+                        <button id="langMode-top500" class="lang-mode-btn" onclick="setLanguageMode('top500')">Top 500</button>
+                        <button id="langMode-all" class="lang-mode-btn" onclick="setLanguageMode('all')">All 2446 languages</button>
+                    </div>
+                </div>
+                
+                <!-- Multi-select dropdown -->
+                <div class="language-dropdown" id="languageDropdown">
+                    <div class="dropdown-trigger" onclick="toggleDropdown()">
+                        <span class="dropdown-placeholder" id="dropdownPlaceholder">Select languages...</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-search">
+                            <input type="text" id="languageSearchInput" placeholder="Search languages..." oninput="filterLanguageList()">
+                        </div>
+                        <div class="dropdown-list" id="languageList">
+                            Loading...
+                        </div>
+                        <div class="dropdown-actions">
+                            <button class="dropdown-clear" onclick="clearLanguageSelection()">Clear All</button>
+                            <button class="dropdown-apply" onclick="applyLanguageFilter()">Apply Filter</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Selected languages tags -->
+                <div class="selected-languages" id="selectedLanguagesTags"></div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div id="results"></div>
+        </div>
+        </div>
+
+        <!-- Explore Mode -->
+        <div id="exploreMode" class="mode-content" style="display: none;">
+            <div class="explore-section">
+                <h3>Select Languages to Compare</h3>
+                <p style="color: #666; margin-bottom: 15px;">Choose 2 or more languages to see all word coincidences between them</p>
+                
+                <div class="lang-mode-buttons" style="margin-bottom: 15px;">
+                    <button id="exploreLangMode-top120" class="lang-mode-btn active" onclick="setExploreLangMode('top120')">Top 120</button>
+                    <button id="exploreLangMode-top500" class="lang-mode-btn" onclick="setExploreLangMode('top500')">Top 500</button>
+                    <button id="exploreLangMode-all" class="lang-mode-btn" onclick="setExploreLangMode('all')">All languages</button>
+                </div>
+                
+                <div class="explore-language-selector">
+                    <input type="text" class="explore-lang-search" id="exploreLanguageSearch" placeholder="Search languages..." oninput="renderExploreLanguageList()">
+                    <div class="explore-language-list" id="exploreLanguageList"></div>
+                </div>
+                
+                <div class="explore-selected" style="margin-top: 20px;">
+                    <h4>Selected Languages:</h4>
+                    <div class="explore-selected-tags" id="exploreSelectedTags">
+                        <span class="no-selection">Select at least 2 languages to find coincidences</span>
+                    </div>
+                </div>
+                
+                <div class="explore-actions" style="margin-top: 20px;">
+                    <button class="clear-btn" onclick="clearExploreLanguages()">Clear All</button>
+                    <button class="find-btn" onclick="findCoincidences()">🔍 Find Coincidences</button>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <div id="exploreResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="search.js"></script>
+</body>
+</html>
