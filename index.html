@@ -1,50 +1,133 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>ling poet</title>
-        <link rel="stylesheet" type="text/css" href="css-folder/style.css">
-    </head>
-    <body>
-        <h1>Explore words and sounds that randomly connect across languages</h1>
-        <h2>Can you use them in a poem?</h2>
-        <h3>We're not interested in words with a similar etymological root or loan words. We're looking for the weird words, the ones that are the same purely through coincidence.</h3>
-        <p>To start, let's look at some examples of words across languages that are spelled the same but mean completely different things. Note that as linguists, we are interested in all words, even those that may be considered slang, informal, or vulgar.</p>
-        <br>
-        <p><img src="images/glad_rooster.jpg" alt="a sign reading glad rooster" width="300"><small>This sign could either be welcoming you to a happy poultry farm in English, or warning cyclists in Dutch about a grate of metal bars in the path ahead.<br>
-        The Hague, Netherlands. Photo: Lydia Brosnahan.</small></p>
-        <br>
-        <!----<p><img src="images/speed_fart.webp" alt="a poster for a movie called FART" width="300"> &nbsp; <img src="images/finding_dory_slut.webp" alt="a screengrab of the word 'slut' on a watery background" width="300"></p>
-       <p>Some classics from the world of cinema. In Danish, Swedish, and Norwegian, "fart" means "speed" and "slut" means "end." <small>Source: <a href="https://www.reddit.com/r/interestingasfuck/comments/1p83sy6/the_swedish_title_of_a_movie_named_speed/">Reddit</a>, <a href="https://www.buzzfeed.com/stephenlaconte/finding-dory-swedish-translation-omg">Buzzfeed</a></small></p>--->
-       <hr>
-        <p> Some  interesting word pairs in Norwegian and English:</p>
-        
-        <div id='nor-eng'></div>
-        <br>
-        <p>The hit Norwegian TV show "SKAM" ends with a title screen reading "Alt Er Love" — "Everything is Love" — using the English word "Love." However, it's also a play on words with the Norwegian phrase "Alt Er Lov" — everything is allowed/permitted. Additionally, "lover" in Norwegian is a verb meaning "to promise."</p>
-        <p>What could a love poem look like, incorporating some of these words? Promises, lovers, gifts, poison... what hidden meanings can you find?</p>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LingPoet</title>
+    <link rel="stylesheet" href="behind-the-words/behind-the-words.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
+  </head>
+
+  <body>
+    <!-- Top Navigation -->
+    <header class="topbar">
+      <nav class="nav" aria-label="Primary navigation">
+        <!-- Left: search icon placeholder -->
+        <a class="nav__icon" href="#" aria-label="Search">⌕</a>
+
+        <!-- Center brand -->
+        <a class="nav__brand" href="index.html">LINGPOET</a>
+
+        <!-- Center links -->
+        <ul class="nav__links">
+          <li><a href="index.html">Behind the Words</a></li>
+          <li><a href="wander/index.html">Wander</a></li>
+          <li><a href="words-studio/search.html">Words Studio</a></li>
+          <li><a href="who-we-are/index.html">Who We Are</a></li>
+        </ul>
+
+      </nav>
+    </header>
+
+    <!-- Hero -->
+    <main>
+      <section class="hero" aria-label="LingPoet hero">
+        <img
+          class="hero__img"
+          src="behind-the-words/hero-image.jpeg"
+          alt="Vintage paper background with illustration details"
+        >
+
+        <!-- Optional overlay for readability -->
+        <div class="hero__overlay" aria-hidden="true"></div>
+
+        <div class="hero__content">
+          <p class="hero__kicker">A quiet and playful place for language.</p>
+          <h1 class="hero__title">Words, held gently.</h1>
+
+          <div class="hero__actions">
+            <a class="button" href="words-studio/index.html">ENTER STUDIO</a>
+            <a class="button button--ghost" href="wander/index.html">WANDER</a>
+          </div>
+        </div>
+      </section>
+
+    <!-- Thesis / Concept statement -->
+      <section class="thesis">
         <p><em>
-            I met you at the <b>gate</b>,<br>
-            not a door, but a long street<br>
-            where <b>time</b> stretched - <br>
-            an hour pretending to be forever.<br>
-            <br>
-            You smiled; there was a <b>smell</b> in the air,<br>
-            not perfume, but thunder,<br>
-            and the world went loud<br>
-            in the softest way.<br>
-            <br>
-            You said you <b>lover</b> me - <br>
-            a promise, carefully wrapped,<br>
-            a <b>gift</b> held out with both hands:<br>
-            sweet in one tongue,<br>
-            <b>poison</b> in another.<br>
-            <br></em>
+        We're not interested in words with a similar etymological root or loan words. <br>
+        We're looking for the weird words - the ones that are the same purely through coincidence.
+        </em></p>
+      </section>
+
+    <!-- Behind the Words (data + method) -->
+      <section class="btw" aria-labelledby="btw-title">
+        <div class="btw__inner">
+          <header class="btw__header">
+            <h2 id="btw-title">Behind the Words</h2>
+            <p class="btw__lede">
+            Not a dictionary. Not a genealogy of language.
+            We collect coincidences: words that look alike without borrowing, shared roots, or historical handshakes.
+            Here’s where the data comes from, how we gather it, and how we keep it clean enough to play with.
+            </p>
+          </header>
+
+        <div class="btw__grid">
+          <article class="card">
+            <h3 class="card__title">Sources</h3>
+            <p class="card__text">
+            A small map of where our word forms and metadata come from — public, cited, and versioned.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3 class="card__title">Retrieval</h3>
+            <p class="card__text">
+            How we collect, normalize, and deduplicate entries before they enter the studio.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3 class="card__title">Storage</h3>
+            <p class="card__text">
+            How we store the dataset so it’s fast to explore, transparent to audit, and easy to update.
+            </p>
+          </article>
+
+          <article class="card card--wide">
+            <h3 class="card__title">Assumptions & caveats</h3>
+            <p class="card__text">
+            What we exclude (loanwords, shared roots), what “coincidence” means for us, and the edge cases we keep an eye on.
+            </p>
+          </article>
+        </div>
+
+        <div class="btw__cta">
+          <div class="btw__cta-text">
+            <h3>Dare to Play?</h3>
+            <p>Dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy.</p>
+          </div>
+        <a class="btw__button" href="behind-the-words/index.html">Open Words Studio →</a>
+        </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p class="site-footer__left">
+          © 2026 LingPoet
         </p>
-       <hr>
-        <p>We're working on sorting through more example words using a <a href="https://www.kaikki.org">dataset from Wiktionary via kaikki.org</a>. Here's a sneak peek of what that might look like (click to view each word):</p>
-        <div id='samplelangs'></div><br>
-        <a href='who-we-are/index.html'>Learn more about our team</a>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.2.8/d3.min.js"></script>
-        <script src="main.js"></script>
-    </body>
+
+        <p class="site-footer__right">
+          Created at Harvard Kennedy School
+        </p>
+      </div>
+    </footer>
+
+  </body>
 </html>
