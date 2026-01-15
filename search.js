@@ -329,6 +329,14 @@ async function searchDatabase(query) {
         }
     }
 
+    // Sort results: exact matches first, then by number of languages
+    results.sort((a, b) => {
+        const aExact = a.match_key === searchKey ? 0 : 1;
+        const bExact = b.match_key === searchKey ? 0 : 1;
+        if (aExact !== bExact) return aExact - bExact;
+        return b.languages - a.languages;
+    });
+
     return results;
 }
 
