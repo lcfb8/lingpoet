@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wander — LingPoet</title>
+
+    <!-- Wander CSS (same folder) -->
+    <link rel="stylesheet" href="style-wander.css">
+
+    <!-- Font (same as homepage) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap"
+      rel="stylesheet"
+    >
+  </head>
+
+  <body>
+    <!-- Top Navigation (MATCHES HOMEPAGE HEADER STRUCTURE) -->
+    <header class="topbar">
+      <nav class="nav" aria-label="Primary navigation">
+        <!-- Left: search icon placeholder -->
+        <a class="nav__icon" href="#" aria-label="Search">⌕</a>
+
+        <!-- Center brand -->
+        <a class="nav__brand" href="../index.html">LINGPOET</a>
+
+        <!-- Center links -->
+        <ul class="nav__links">
+          <li><a href="../index.html#behind-the-words">Behind the Words</a></li>
+          <li><a href="index.html" aria-current="page">Wander</a></li>
+          <li><a href="../words-studio/index.html">Words Studio</a></li>
+          <li><a href="../who-we-are/index.html">Who We Are</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="page">
+
+      <!-- Intro -->
+      <section class="intro" aria-labelledby="wander-title">
+        <!--<p class="kicker">Explore words and sounds that randomly connect across languages</p>-->
+        <h1 id="wander-title">Explore words and sounds that randomly connect across languages</h1>
+        <p class="lede">
+          Fun facts, unexpected word pairs, tiny poems, and a sneak peek into the dataset behind LingPoet.
+          We’re not chasing shared roots — just delightful accidents.
+          As linguists, we are interested in all words, even those that may be considered slang, informal, or vulgar.
+        </p>
+      </section>
+
+      <!-- 1) Quirky fun fact -->
+      <section class="panel" aria-labelledby="funfact-title">
+        <div class="panel__inner split">
+          <figure class="media">
+            <img src="../images/glad_rooster.jpg" alt="A sign reading 'glad rooster'">
+            <figcaption class="caption">
+              The Hague, Netherlands. Photo: Lydia Brosnahan.
+            </figcaption>
+          </figure>
+
+          <div class="text">
+            <h2 id="funfact-title"><b>A sign, two worlds</b></h2>
+            <p>
+              This is a classic LingPoet moment: your eyes read a familiar phrase, your brain nods politely,
+              and then another language interprets the same letters as something else entirely.
+            </p>
+            <p class="note">
+              <strong>Our filter:</strong> we avoid etymological relatives and loanwords.
+              We keep the pairs that match by coincidence (and comedic timing).
+            </p>
+            <p>
+              A sign that looks perfectly normal in English — until another language walks in.
+              This sign could either be welcoming you to a happy poultry farm in English, or warning cyclists in Dutch about a grate of metal bars in the path ahead.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2) Norwegian–English pairs -->
+      <section class="section" aria-labelledby="pairs-title">
+        <header class="section__header">
+          <h2 id="pairs-title">Some interesting word pairs in Norwegian and English</h2>
+            <p class="section__lede">
+            Same spelling. Different meanings. Pure coincidence — and occasionally, chaos.
+            </p>
+        </header>
+
+      <div class="pairs-table" role="table" aria-label="Norwegian and English word pairs">
+        <div class="pairs-row pairs-head" role="row">
+          <div class="pairs-cell" role="columnheader">Word</div>
+          <div class="pairs-cell" role="columnheader">Meaning in English</div>
+          <div class="pairs-cell" role="columnheader">Meaning in Norwegian</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">dust</div>
+          <div class="pairs-cell" role="cell">powder of small particles</div>
+          <div class="pairs-cell" role="cell">slang for a jerk</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">smell</div>
+          <div class="pairs-cell" role="cell">odor</div>
+          <div class="pairs-cell" role="cell">loud sound</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">karen</div>
+          <div class="pairs-cell" role="cell">woman's name</div>
+          <div class="pairs-cell" role="cell">the guy</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">bra</div>
+          <div class="pairs-cell" role="cell">woman's undergarment</div>
+          <div class="pairs-cell" role="cell">good</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">god</div>
+          <div class="pairs-cell" role="cell">deity</div>
+          <div class="pairs-cell" role="cell">good</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">time</div>
+          <div class="pairs-cell" role="cell">time</div>
+          <div class="pairs-cell" role="cell">hour</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">her</div>
+          <div class="pairs-cell" role="cell">female pronoun</div>
+          <div class="pairs-cell" role="cell">here</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">gate</div>
+          <div class="pairs-cell" role="cell">door or portal</div>
+          <div class="pairs-cell" role="cell">street</div>
+        </div>
+
+        <div class="pairs-row" role="row">
+          <div class="pairs-cell pairs-word" role="cell">gift</div>
+          <div class="pairs-cell" role="cell">present</div>
+          <div class="pairs-cell" role="cell">poison or married</div>
+        </div>
+      </div>
+
+      <aside class="pairs-note" aria-label="Fun linguistic aside">
+        <p class="pairs-aside__label"><b>A small linguistic cameo</b></p>
+
+        <p class="pairs-aside__text">
+        The hit Norwegian TV show <em>SKAM</em> ends with a title screen that reads
+        <em>Alt Er Love</em> — “Everything is Love” — borrowing the English word <em>love</em>.
+        But it’s also a wink at the Norwegian phrase <em>Alt er lov</em> (“everything is allowed”).
+        And as if that weren’t enough: <em>lover</em> in Norwegian can mean “to promise.”
+        </p>
+      </aside>
+
+      </section>
+
+      <!-- 3) Poem example -->
+      <section class="panel panel--soft" aria-labelledby="poem-title">
+        <div class="panel__inner">
+          <header class="section__header">
+            <h2 id="poem-title">A small poem experiment</h2>
+            <p class="section__lede">
+              How do coincidences sound when you let them become a line?
+            </p>
+          </header>
+
+          <div class="poem">
+            <p>
+              I brought you a <em>gift</em>,<br>
+              a word wrapped in clean paper —<br>
+              but it opened like a warning<br>
+              in the other room.
+            </p>
+
+            <p>
+              Outside, the <em>barn</em> held quiet,<br>
+              and inside, it held a childhood<br>
+              I couldn’t translate,<br>
+              only carry.
+            </p>
+
+            <p>
+              We laughed —<br>
+              not because it was funny,<br>
+              but because language<br>
+              sometimes forgets to be polite.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4) Sneak peek (playful + interactive) -->
+      <section class="section" aria-labelledby="peek-title">
+        <header class="section__header">
+          <h2 id="peek-title">Sneak peek: tap to reveal</h2>
+          <p class="section__lede">
+            Little tiles from the dataset. Click a word to reveal meanings.
+            (No JavaScript needed — we use <code>&lt;details&gt;</code>.)
+          </p>
+        </header>
+
+        <div class="peek-grid">
+          <details class="peek">
+            <summary class="peek__front">
+              <span class="peek__word">gift</span>
+              <span class="peek__hint">tap to reveal</span>
+            </summary>
+            <div class="peek__back">
+              <p><strong>English:</strong> a present</p>
+              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
+            </div>
+          </details>
+
+          <details class="peek">
+            <summary class="peek__front">
+              <span class="peek__word">barn</span>
+              <span class="peek__hint">tap to reveal</span>
+            </summary>
+            <div class="peek__back">
+              <p><strong>English:</strong> a farm building</p>
+              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
+            </div>
+          </details>
+
+          <details class="peek">
+            <summary class="peek__front">
+              <span class="peek__word">rom</span>
+              <span class="peek__hint">tap to reveal</span>
+            </summary>
+            <div class="peek__back">
+              <p><strong>English:</strong> rum (sound/shape)</p>
+              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
+            </div>
+          </details>
+
+          <details class="peek">
+            <summary class="peek__front">
+              <span class="peek__word">time</span>
+              <span class="peek__hint">tap to reveal</span>
+            </summary>
+            <div class="peek__back">
+              <p><strong>English:</strong> time</p>
+              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
+            </div>
+          </details>
+
+          <details class="peek">
+            <summary class="peek__front">
+              <span class="peek__word">fine</span>
+              <span class="peek__hint">tap to reveal</span>
+            </summary>
+            <div class="peek__back">
+              <p><strong>English:</strong> okay / good</p>
+              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
+            </div>
+          </details>
+
+          <details class="peek">
+            <summary class="peek__front">
+              <span class="peek__word">skam</span>
+              <span class="peek__hint">tap to reveal</span>
+            </summary>
+            <div class="peek__back">
+              <p><strong>Norwegian:</strong> shame (example)</p>
+              <p><strong>English:</strong> (placeholder meaning)</p>
+            </div>
+          </details>
+        </div>
+
+        <div class="peek-footer">
+          <p class="muted">
+            Later, Words Studio will let you search and filter the full dataset — and leave your own lines underneath.
+          </p>
+          <a class="pill" href="../words-studio/index.html">Go to Words Studio →</a>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer (same vibe as homepage) -->
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>© 2026 LingPoet</p>
+        <p>Created at Harvard Kennedy School</p>
+      </div>
+    </footer>
+  </body>
+</html>
