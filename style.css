@@ -188,7 +188,7 @@ a:hover { border-bottom-color: var(--ink); }
 .hero__content {
   position: absolute;
   left: 50%;
-  bottom: 3rem;
+  bottom: 5rem;
   transform: translateX(-50%);
   width: min(920px, calc(100% - 3rem));
   text-align: center;
