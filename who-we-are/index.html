@@ -12,13 +12,15 @@
         <!-- Top Navigation -->
         <header class="topbar">
           <nav class="nav" aria-label="Primary navigation">
-            <!-- Left: search icon placeholder -->
-            <a class="nav__icon" href="#" aria-label="Search">⌕</a>
+            <a class="nav__icon" href="#" aria-label="Search" role="button">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
 
-            <!-- Center brand -->
             <a class="nav__brand" href="../index.html">LINGPOET</a>
 
-            <!-- Center links -->
             <ul class="nav__links">
               <li><a href="../index.html">Behind the Words</a></li>
               <li><a href="../wander/index.html">Wander</a></li>
@@ -26,6 +28,7 @@
               <li><a href="index.html" class="active">Who We Are</a></li>
             </ul>
 
+            <div class="nav__right" aria-hidden="true"></div>
           </nav>
         </header>
 
@@ -33,90 +36,98 @@
         <header class="opening-section">
             <div class="opening-content">
                 <h1 class="opening-title">About Us!</h1>
-
-            <!-- Opening -->
-            <div class="about-content">
-                <p>
-                This is a space shaped by attention to <em>language</em>.<br>
-                To how words are chosen, placed, and allowed to <em>mean</em>.
-                </p>
-                <p>
-                Here, language is not rushed.<br>
-                It is examined, enjoyed, and <em>occasionally left open</em>.
-                </p>
-                <p>
-                The website is built as a shared practice - part linguistic, part poetic - by two people who care about how words work and how they feel.
-                </p>
-            </div>
-            </div>
-        </header>
-        <hr>
-
+ 
+             <!-- Opening -->
+             <div class="about-content">
+                 <p>
+                 This is a space shaped by attention to <em>language</em>.<br>
+                 To how words are chosen, placed, and allowed to <em>mean</em>.
+                 </p>
+                 <p>
+                 Here, language is not rushed.<br>
+                 It is examined, enjoyed, and <em>occasionally left open</em>.
+                 </p>
+                 <p>
+                 The website is built as a shared practice - part linguistic, part poetic - by two people who care about how words work and how they feel.
+                 </p>
+             </div>
+             </div>
+         </header>
+         <hr>
+ 
         <!-- Lydia (image left, text right) -->
         <section class="split-section-lidya" aria-labelledby="lydia-heading">
-            
             <div class="split-media-lidya">
-                <img
-                src="lidya.jpeg" 
-                alt="Portrait of Lydia"
-                >
+                <img src="lidya.jpeg" alt="Portrait of Lydia">
             </div>
 
             <div class="split-content-lidya">
-                <h2 id="lydia-heading">Lydia</h2>
-                
-                <p>
-                Lydia is a language enthusiast and a Mid-Career Master in Public Administration student at the Harvard Kennedy School.<br>
-                Her professional background is in higher education and arts administration.<br>
-                Before coming to Harvard, she worked in the Office of the Arts at MIT, where language often had to move between institutions, disciplines, and people who did not always speak the same way.<br>
-                She pays attention to structure, nuance, and the small decisions that change meaning.<br>
-                She believes clarity can be generous, and that precision does not have to be cold.<br>
-                Lydia approaches language as something to be understood - and <em>respected</em>.
-                </p>
+                <h2 id="lydia-heading">Lydia</h2><br>
+
+                <!-- decorative box that sits behind the paragraph and extends under the photo -->
+                <div class="lydia-box" aria-hidden="true"></div>
+
+                <div class="about-content">
+                  <p>
+                  Lydia is a language enthusiast and a Mid-Career Master in Public Administration student at the Harvard Kennedy School.<br>
+                  Her professional background is in higher education and arts administration.<br>
+                  Before coming to Harvard, she worked in the Office of the Arts at MIT, where language often had to move between institutions, disciplines, and people who did not always speak the same way.<br>
+                  She pays attention to structure, nuance, and the small decisions that change meaning.<br>
+                  She believes clarity can be generous, and that precision does not have to be cold.<br>
+                  Lydia approaches language as something to be understood - and <em>respected</em>.
+                  </p>
+                </div>
             </div>
         </section>
-        <hr>
 
         <!-- Elsa (text left, image right) -->
         <section class="split-section-elsa" aria-labelledby="elsa-heading">
             <div class="split-content-elsa">
-                <h2 id="elsa-heading-elsa"> Elsa </h2>
-            
-                <p>
-                Elsa is a poetry enthusiast and a Master in Public Policy student at the Harvard Kennedy School.<br>
-                Her professional background is in statistics.<br>
-                Before coming to Harvard, she worked at a statistical agency, where numbers were expected to be exact, even when what they described was not.<br>
-                She is drawn to rhythm, imagery, and the emotional weight carried by a line.<br>
-                She listens for how language moves, where it pauses, and what it leaves behind.<br>
-                Elsa approaches language as something to be felt - <em>and returned to</em>.
-                </p>
+                <h2 id="elsa-heading-elsa">Elsa</h2>
+
+                <!-- decorative box behind the paragraph, extending under the photo (mirrors Lydia but on the right) -->
+                <div class="elsa-box" aria-hidden="true"></div>
+
+                <div class="about-content">
+                  <p>
+                  Elsa is a poetry enthusiast and a Master in Public Policy student at the Harvard Kennedy School.<br>
+                  Her professional background is in statistics.<br>
+                  Before coming to Harvard, she worked at a statistical agency, where numbers were expected to be exact, even when what they described was not.<br>
+                  She is drawn to rhythm, imagery, and the emotional weight carried by a line.<br>
+                  She listens for how language moves, where it pauses, and what it leaves behind.<br>
+                  Elsa approaches language as something to be felt - <em>and returned to</em>.
+                  </p>
+                </div>
             </div>
-            
+
             <div class="split-media-elsa">
-                <img
-                src="elsa.jpg"
-                alt="Portrait of Elsa"
-                >
-            </div> 
+                <img src="elsa.jpg" alt="Portrait of Elsa">
+            </div>
         </section>
         <hr>
 
         <!-- Together -->
-        <section aria-labelledby="together-heading">
-            <p>
-                Lydia and Elsa are co-authors of this website.<br>
-                They share a love for words, an eye for detail, and a belief that language shapes how we pay attention.
-            </p>
-            <p>
-                One tends to ask <em>how language works</em>.<br>
-                The other wonders <em>what it does to us</em>.
-            </p>
-            <p>
-                They sometimes agree.<br>
-                They often edit each other.
-            </p>
+        <section class="together-panel panel panel--soft" aria-labelledby="together-heading">
+          <div class="panel__inner together-grid">
+              <p>Lydia and Elsa are co-authors of this website. They share a love for words, an eye for detail, and a belief that language shapes how we pay attention.</p>
+              <p>One tends to ask <em>how language works</em>. The other wonders <em>what it does to us</em>.</p>
+              <p>They sometimes agree. They often edit each other.</p>
+          </div>
         </section>
         
         </article>
-    </body>
-</html>
+
+        <!-- Page footer (same as homepage) -->
+        <footer class="site-footer">
+          <div class="site-footer__inner">
+            <p class="site-footer__left">
+              © 2026 LingPoet
+            </p>
+
+            <p class="site-footer__right">
+              Created at Harvard Kennedy School
+            </p>
+          </div>
+        </footer>
+      </body>
+    </html>

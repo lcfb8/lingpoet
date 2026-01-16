@@ -1372,83 +1372,149 @@ input[type="text"]::placeholder {
 
 /* Split layout - Lidya (image left, text right) */
 .split-section-lidya {
-  background: var(--paper);
-  display: grid;
-  grid-template-columns: 3fr 4fr;
-  min-height: 0vh;
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  position: relative;
+  max-width: var(--max, 1100px);
+  margin: 1.75rem auto;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+/* image column — use a percentage so the overlay box can be positioned responsively */
 .split-media-lidya {
-  display: flex;
-  align-items: center;
-  justify-content: right;
-  padding: 1rem 1rem;
+  flex: 0 0 40%;
+  max-width: 40%;
+  position: relative;
+  z-index: 3; /* ensure image sits above the decorative box */
 }
+.split-media-lidya img { display:block; width:100%; height:auto; border-radius:10px; }
 
-.split-media-lidya img {
-  width: min(360px, 80%);
-  height: auto;
-  border-radius: 4%;
-}
-
+/* content column */
 .split-content-lidya {
-  background: var(--paper);
-  padding: 4rem 3rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: left;
+  flex: 1 1 60%;
+  position: relative; /* establishes positioning context for .lydia-box */
+  min-width: 0;
 }
-
+/* add one line of space after the heading */
 .split-content-lidya h2 {
-  margin-top: 0;
-  font-size: clamp(2rem, 3vw, 3rem);
-  line-height: 1.1;
+  margin: 0 0 1rem 0;
+  font-size: 1.4rem;
 }
 
-.split-content-lidya p {
-  max-width: 60ch;
-  line-height: 1.75;
+/* make the paragraph slightly smaller (one size down) and ensure it sits above the decorative box */
+.split-content-lidya .about-content {
+  position: relative;
+  z-index: 2; /* text above the decorative box */
+}
+.split-content-lidya .about-content p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.95rem; /* reduced by ~1 size */
+  line-height: 1.6;
+}
+
+/* Decorative box: covers from under the H2 to the end of the content and extends left to overlap with the image */
+/* Keep box dimensions as requested; place it behind both the photo and paragraph (image z-index:3, text z-index:2, box z-index:1) */
+.lydia-box {
+  position: absolute;
+  top: calc(1.4rem + 1rem); /* push the box down so there's one line of space under the H2 */
+  bottom: -1rem; /* extend slightly below paragraph to cover more room */
+  left: calc(-40% / 2); /* half of the image column negative to move under the image */
+  width: calc(100% + (40% / 2)); /* stretch to right edge and include the image overlap */
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,249,247,0.9));
+  border: 1px solid rgba(16,24,40,0.04);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(15,23,42,0.03);
+  z-index: 1; /* behind image (3) and paragraph (2) */
+  pointer-events: none;
+}
+
+/* responsive adjustments — keep box alignment but ensure it doesn't overflow on small screens */
+@media (max-width: 900px) {
+  .split-section-lidya { flex-direction: column; }
+  .split-media-lidya, .split-content-lidya { max-width: 100%; flex-basis: auto; }
+  .lydia-box { left: 0; width: 100%; top: calc(1.4rem + 0.6rem); bottom: -0.6rem; border-radius: 10px; }
+}
+@media (max-width: 520px) {
+  .lydia-box { top: calc(1.2rem + 0.5rem); bottom: -0.4rem; }
 }
 
 /* Split layout - Elsa (image right, text left) */
 .split-section-elsa {
-  background: var(--paper);
-  display: grid;
-  grid-template-columns: 4fr 3fr;
-  min-height: 0vh;
-}
-
-.split-content-elsa {
-  background: var(--paper);
-  padding: 4rem 3rem;
   display: flex;
-  flex-direction: column;
-  justify-content: right;
+  gap: 1.5rem;
+  align-items: flex-start;
+  position: relative;
+  max-width: var(--max, 1100px);
+  margin: 1.75rem auto;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.split-content-elsa h2 {
-  margin-top: 0;
-  font-size: clamp(2rem, 3vw, 3rem);
-  line-height: 1.1;
-}
-
-.split-content-elsa p {
-  max-width: 60ch;
-  line-height: 1.75;
-}
-
+/* image column on right */
 .split-media-elsa {
-  display: flex;
-  align-items: center;
-  justify-content: left;
-  text-align: right;
-  padding: 1rem 1rem;
+  flex: 0 0 40%;
+  max-width: 40%;
+  position: relative;
+  z-index: 3; /* image above decorative box */
 }
-
 .split-media-elsa img {
+  display: block;
   width: min(360px, 80%);
   height: auto;
   border-radius: 4%;
+}
+
+/* content column on left */
+.split-content-elsa {
+  flex: 1 1 60%;
+  position: relative; /* positioning context for .elsa-box */
+  min-width: 0;
+}
+.split-content-elsa h2 {
+  margin: 0 0 1rem 0; /* one line space under heading */
+  font-size: 1.4rem;
+  text-align: right; /* heading aligned with paragraph */
+}
+
+/* paragraph slightly smaller and right-aligned */
+.split-content-elsa .about-content {
+  position: relative;
+  z-index: 2; /* text above the decorative box */
+  text-align: right;
+}
+.split-content-elsa .about-content p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Decorative box sits behind paragraph and extends right under the image */
+.elsa-box {
+  position: absolute;
+  top: calc(1.4rem + 1rem); /* start below the heading */
+  bottom: -1rem; /* extend slightly below paragraph */
+  right: calc(-40% / 2); /* extend under the image on the right */
+  width: calc(100% + (40% / 2)); /* cover content + overlap half the image */
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,249,247,0.9));
+  border: 1px solid rgba(16,24,40,0.04);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(15,23,42,0.03);
+  z-index: 1; /* behind text (2) and image (3) */
+  pointer-events: none;
+}
+
+/* responsive adjustments */
+@media (max-width: 900px) {
+  .split-section-elsa { flex-direction: column; }
+  .split-media-elsa, .split-content-elsa { max-width: 100%; flex-basis: auto; }
+  .elsa-box { right: 0; width: 100%; top: calc(1.4rem + 0.6rem); bottom: -0.6rem; border-radius: 10px; }
+}
+@media (max-width: 520px) {
+  .elsa-box { top: calc(1.2rem + 0.5rem); bottom: -0.4rem; }
 }
 
 /* ========================================
@@ -1547,4 +1613,53 @@ input[type="text"]::placeholder {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* Together panel — centered, single-column boxes that match outer panel width */
+.together-panel {
+  max-width: 760px;
+  margin: 2rem auto;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: block;
+}
+
+.together-grid {
+  /* no grid — stack items to fill the outer panel width */
+  display: block;
+  max-width: 720px;
+  margin: 0 auto;
+  gap: 1rem;
+}
+
+.together-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+/* Card: full width of the outer panel, same color/gradient as before, centered text */
+.together-card {
+  width: 100%;
+  max-width: none;
+  padding: 1rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg,
+    rgba(245,243,241,0.98),
+    rgba(250,249,247,0.92)
+  );
+  border: 1px solid rgba(16,24,40,0.04);
+  box-shadow: 0 6px 20px rgba(15,23,42,0.03);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--ink);
+  text-align: center;          /* center paragraph text */
+  margin: 0 0 1rem 0;
+  box-sizing: border-box;
+}
+
+/* ensure stacked layout on small screens remains consistent */
+@media (max-width: 820px) {
+  .together-grid { max-width: 100%; }
+  .together-card { max-width: 100%; }
 }
