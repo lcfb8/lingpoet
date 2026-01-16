@@ -169,26 +169,24 @@
           </header>
 
           <div class="poem">
-            <p>
-              I brought you a <em>gift</em>,<br>
-              a word wrapped in clean paper —<br>
-              but it opened like a warning<br>
-              in the other room.
-            </p>
-
-            <p>
-              Outside, the <em>barn</em> held quiet,<br>
-              and inside, it held a childhood<br>
-              I couldn’t translate,<br>
-              only carry.
-            </p>
-
-            <p>
-              We laughed —<br>
-              not because it was funny,<br>
-              but because language<br>
-              sometimes forgets to be polite.
-            </p>
+            <p><em>
+            I met you at the <b>gate</b>,<br>
+            not a door, but a long street<br>
+            where <b>time</b> stretched - <br>
+            an hour pretending to be forever.<br>
+            <br>
+            You smiled; there was a <b>smell</b> in the air,<br>
+            not perfume, but thunder,<br>
+            and the world went loud<br>
+            in the softest way.<br>
+            <br>
+            You said you <b>lover</b> me - <br>
+            a promise, carefully wrapped,<br>
+            a <b>gift</b> held out with both hands:<br>
+            sweet in one tongue,<br>
+            <b>poison</b> in another.<br>
+            <br></em>
+          </p>
           </div>
         </div>
       </section>
@@ -198,77 +196,25 @@
         <header class="section__header">
           <h2 id="peek-title">Sneak peek: tap to reveal</h2>
           <p class="section__lede">
-            Little tiles from the dataset. Click a word to reveal meanings.
-            (No JavaScript needed — we use <code>&lt;details&gt;</code>.)
+            Pick up to three languages, click "Go wander" to surface 6 coincident words, then tap a tile to reveal IPA and meanings for the selected languages.
           </p>
         </header>
 
-        <div class="peek-grid">
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">gift</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> a present</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
+        <div class="peek-controls peek-controls--center">
+          <div class="peek-controls__row">
+            <label for="lang-select">Choose languages (up to 3)</label>
+            <select id="lang-select" multiple size="6" aria-label="Select up to three languages"></select>
+          </div>
 
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">barn</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> a farm building</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
+          <div class="peek-controls__row">
+            <button id="go-wander" class="pill" disabled>Go wander</button>
+            <button id="randomize" class="pill" disabled>Randomize</button>
+            <div id="status" class="muted">Loading dataset…</div>
+          </div>
+        </div>
 
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">rom</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> rum (sound/shape)</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
-
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">time</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> time</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
-
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">fine</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> okay / good</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
-
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">skam</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>Norwegian:</strong> shame (example)</p>
-              <p><strong>English:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
+        <div id="peek-grid" class="peek-grid" aria-live="polite" role="list">
+          <!-- six tiles injected here -->
         </div>
 
         <div class="peek-footer">
@@ -288,5 +234,270 @@
         <p>Created at Harvard Kennedy School</p>
       </div>
     </footer>
+
+    <!-- libs: pako for gunzip and sql.js for SQLite parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+    <script>
+      (async function () {
+        const DB_URL = "https://dhrumil-public.s3.amazonaws.com/code4policy/coincidences.db.gz";
+        const statusEl = document.getElementById("status");
+        const langSelect = document.getElementById("lang-select");
+        const goBtn = document.getElementById("go-wander");
+        const randBtn = document.getElementById("randomize");
+        const grid = document.getElementById("peek-grid");
+        let dataset = []; // {word, ipa, language, meaning}
+
+        const setStatus = (s) => { if (statusEl) statusEl.textContent = s; };
+
+        try {
+          setStatus("Fetching dataset…");
+          const detectedLangSet = new Set();
+          const res = await fetch(DB_URL);
+          const ab = await res.arrayBuffer();
+          setStatus("Decompressing…");
+          const u8 = pako.ungzip(new Uint8Array(ab));
+          setStatus("Initializing SQL engine…");
+          const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
+          const db = new SQL.Database(u8);
+
+          setStatus("Discovering tables…");
+          const tablesRes = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+          const tables = (tablesRes[0] && tablesRes[0].values) ? tablesRes[0].values.map(r => r[0]) : [];
+
+          function detectCols(table) {
+            try {
+              const info = db.exec("PRAGMA table_info(\"" + table + "\")");
+              if (!info[0]) return null;
+              const cols = info[0].values.map(r => r[1].toLowerCase());
+              const find = (rx) => cols.find(c => c.match(rx));
+              return {
+                word: find(/word|token|lemma|entry/),
+                ipa: find(/ipa|pron|pronunciation/),
+                lang: find(/lang|language|iso/),
+                meaning: find(/meaning|definition|gloss|translation|def/)
+              };
+            } catch (e) { return null; }
+          }
+
+          for (const t of tables) {
+            const cols = detectCols(t);
+            if (!cols || !cols.word || !cols.lang) continue;
+            const sel = [cols.word, cols.ipa, cols.lang, cols.meaning].filter(Boolean).map(c => `"${c}"`).join(", ");
+            try {
+              const r = db.exec(`SELECT ${sel} FROM "${t}" LIMIT 5000`);
+              if (!r[0]) continue;
+              const colsNames = r[0].columns.map(c => c.toLowerCase());
+              for (const row of r[0].values) {
+                const obj = {};
+                for (let i = 0; i < colsNames.length; i++) obj[colsNames[i]] = row[i];
+                dataset.push({
+                  word: obj[colsNames.find(n=>n.match(/word|token|lemma|entry/))] || "",
+                  ipa: obj[colsNames.find(n=>n.match(/ipa|pron/))] || "",
+                  language: String(obj[colsNames.find(n=>n.match(/lang|language|iso/))] || ""),
+                  meaning: obj[colsNames.find(n=>n.match(/meaning|definition|gloss|translation|def/))] || ""
+                });
+              }
+            } catch (e) { /* ignore bad table */ }
+
+            // Collect distinct language values directly from table (more robust)
+            try {
+              const langCol = cols && cols.lang ? cols.lang : null;
+              if (langCol) {
+                const langsRes = db.exec(`SELECT DISTINCT "${langCol}" AS lang FROM "${t}"`);
+                if (langsRes && langsRes[0] && langsRes[0].values) {
+                  for (const row of langsRes[0].values) {
+                    if (row[0]) detectedLangSet.add(String(row[0]));
+                  }
+                }
+              }
+            } catch (e) { /* ignore distinct-lang errors */ }
+          }
+
+          if (dataset.length === 0) {
+            setStatus("No usable rows found — using fallback sample.");
+            dataset = [
+              {word:"gift", ipa:"/ɡɪft/", language:"en", meaning:"present"},
+              {word:"gift", ipa:"/ɡɪft/", language:"no", meaning:"poison"},
+              {word:"gate", ipa:"/ɡeɪt/", language:"en", meaning:"door"},
+              {word:"gate", ipa:"/ɡɑːtə/", language:"no", meaning:"street"},
+              {word:"smell", ipa:"/smɛl/", language:"en", meaning:"odor"},
+              {word:"time", ipa:"/taɪm/", language:"en", meaning:"time"}
+            ];
+          } else {
+            setStatus(`Loaded ${dataset.length} rows.`);
+          }
+
+          // prefer languages found via DISTINCT queries; otherwise derive from parsed rows
+          const langs = detectedLangSet.size ? Array.from(detectedLangSet).sort()
+                      : Array.from(new Set(dataset.map(d=>d.language).filter(Boolean))).sort();
+          if (langs.length === 0) langs.push("en","no","sv");
+          for (const l of langs) {
+            const opt = document.createElement("option");
+            opt.value = l; opt.textContent = l;
+            langSelect.appendChild(opt);
+          }
+          console.log("populated languages:", langs);
+          setStatus("Choose up to 3 languages and click Go wander.");
+          goBtn.disabled = false;
+          randBtn.disabled = false;
+
+          langSelect.addEventListener("change", () => {
+            const selected = Array.from(langSelect.selectedOptions);
+            if (selected.length > 3) selected[selected.length - 1].selected = false;
+          });
+
+          function shuffle(a){ for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
+
+          function pickCandidates(selectedLangs){
+            // If user selected 2+ languages: pick words that appear in >=2 of those languages
+            const byWord = {};
+            for (const e of dataset) {
+              if (!e.word) continue;
+              byWord[e.word] = byWord[e.word] || [];
+              byWord[e.word].push(e);
+            }
+            const candidates = [];
+            for (const [word, entries] of Object.entries(byWord)) {
+              const langsInSelection = Array.from(new Set(entries.filter(en => selectedLangs.length ? selectedLangs.includes(String(en.language)) : true).map(en => en.language)));
+              // require at least 2 different languages among selected languages
+              if (selectedLangs.length >= 2) {
+                if (langsInSelection.filter(Boolean).length >= 2) candidates.push(word);
+              } else if (selectedLangs.length === 1) {
+                // one language selected: prefer words that have multiple distinct meanings in that language or also appear cross-language
+                const lang = selectedLangs[0];
+                const meaningsInLang = Array.from(new Set(entries.filter(en=>String(en.language)===lang).map(en => en.meaning))).filter(Boolean);
+                if (meaningsInLang.length >= 2) candidates.push(word);
+                else {
+                  // fallback: include words that appear in other languages too
+                  const otherLangs = Array.from(new Set(entries.map(en=>en.language))).filter(l=>l && l!==lang);
+                  if (otherLangs.length > 0) candidates.push(word);
+                }
+              } else {
+                // no selection: prefer words that appear in multiple languages overall
+                const allLangs = Array.from(new Set(entries.map(en => en.language))).filter(Boolean);
+                if (allLangs.length >= 2) candidates.push(word);
+              }
+            }
+            return shuffle(candidates);
+          }
+
+          function pickRandomWords(selectedLangs){
+            const candidates = pickCandidates(selectedLangs);
+            const chosen = candidates.slice(0,6);
+            // supplement if not enough
+            if (chosen.length < 6) {
+              const allWords = shuffle(Array.from(new Set(dataset.map(d=>d.word)).values()));
+              for (const w of allWords) {
+                if (chosen.includes(w)) continue;
+                chosen.push(w);
+                if (chosen.length === 6) break;
+              }
+            }
+            // build representative items with word, and for rendering we'll lookup by language
+            return chosen.map(w => ({ word: w }));
+          }
+
+          function renderTiles(items, selectedLangs){
+            grid.innerHTML = "";
+            for (const it of items) {
+              const details = document.createElement("details");
+              details.className = "peek";
+              const summary = document.createElement("summary");
+              summary.className = "peek__front";
+              const wordSpan = document.createElement("span");
+              wordSpan.className = "peek__word";
+              wordSpan.textContent = it.word || "—";
+              const hint = document.createElement("span");
+              hint.className = "peek__hint";
+              hint.textContent = "tap to reveal";
+              summary.appendChild(wordSpan);
+              summary.appendChild(hint);
+              details.appendChild(summary);
+
+              const back = document.createElement("div");
+              back.className = "peek__back";
+
+              // For each selected language (or up to 3 top langs if none selected), show IPA + meaning(s)
+              const langsToShow = selectedLangs.length ? selectedLangs : Array.from(new Set(dataset.map(d=>d.language))).slice(0,3);
+              for (const lang of langsToShow) {
+                const rows = dataset.filter(d => d.word === it.word && String(d.language) === String(lang));
+                const wrapper = document.createElement("div");
+                wrapper.className = "meaning-row";
+                const langLabel = document.createElement("div");
+                langLabel.className = "meaning-lang";
+                langLabel.textContent = lang;
+                wrapper.appendChild(langLabel);
+
+                if (rows.length === 0) {
+                  const p = document.createElement("p");
+                  p.innerHTML = "<em class='muted'>No entry</em>";
+                  wrapper.appendChild(p);
+                } else {
+                  // collect unique IPA and meanings
+                  const ipas = Array.from(new Set(rows.map(r=>r.ipa).filter(Boolean)));
+                  const meanings = Array.from(new Set(rows.map(r=>r.meaning).filter(Boolean)));
+                  if (ipas.length) {
+                    const ipEl = document.createElement("p");
+                    ipEl.innerHTML = "<strong>IPA:</strong> " + ipas.join(" · ");
+                    wrapper.appendChild(ipEl);
+                  }
+                  if (meanings.length) {
+                    for (const m of meanings) {
+                      const mEl = document.createElement("p");
+                      mEl.innerHTML = "<strong>Meaning:</strong> " + m;
+                      wrapper.appendChild(mEl);
+                    }
+                  }
+                }
+                back.appendChild(wrapper);
+              }
+
+              details.appendChild(back);
+              grid.appendChild(details);
+            }
+            randBtn.disabled = false;
+          }
+
+          goBtn.addEventListener("click", ()=>{
+            const selectedLangs = Array.from(langSelect.selectedOptions).map(o=>o.value);
+            if (selectedLangs.length === 0) {
+              alert("Select at least one language (up to 3).");
+              return;
+            }
+            setStatus("Generating words…");
+            const items = pickRandomWords(selectedLangs);
+            renderTiles(items, selectedLangs);
+            setStatus("Tap a tile to reveal IPA and meanings.");
+          });
+
+          randBtn.addEventListener("click", ()=>{
+            const selectedLangs = Array.from(langSelect.selectedOptions).map(o=>o.value);
+            const items = pickRandomWords(selectedLangs);
+            renderTiles(items, selectedLangs);
+            setStatus("Randomized.");
+          });
+
+        } catch (err) {
+          console.error(err);
+          setStatus("Failed to load dataset; using fallback sample.");
+          dataset = [
+            {word:"gift", ipa:"/ɡɪft/", language:"en", meaning:"present"},
+            {word:"gift", ipa:"/ɡɪft/", language:"no", meaning:"poison"},
+            {word:"gate", ipa:"/ɡeɪt/", language:"en", meaning:"door"},
+            {word:"gate", ipa:"/ɡɑːtə/", language:"no", meaning:"street"},
+            {word:"smell", ipa:"/smɛl/", language:"en", meaning:"odor"},
+            {word:"time", ipa:"/taɪm/", language:"en", meaning:"time"}
+          ];
+          const langs = Array.from(new Set(dataset.map(d=>d.language)));
+          for (const l of langs) {
+            const opt = document.createElement("option"); opt.value = l; opt.textContent = l; langSelect.appendChild(opt);
+          }
+          setStatus("Fallback ready — choose languages and click Go wander.");
+          goBtn.disabled = false;
+          randBtn.disabled = false;
+        }
+      })();
+    </script>
   </body>
 </html>
