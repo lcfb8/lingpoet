@@ -1548,3 +1548,103 @@ input[type="text"]::placeholder {
     align-items: flex-start;
   }
 }
+
+/* Peek controls and interactive tiles */
+.peek-controls {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  align-items: start;
+}
+.peek-controls label { font-weight: 600; }
+
+/* Peek controls centered layout */
+.peek-controls--center {
+  display:flex;
+  flex-direction:column;
+  gap:0.75rem;
+  align-items:center;
+  margin-bottom:1rem;
+}
+.peek-controls__row {
+  display:flex;
+  gap:0.6rem;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+/* multi-select styling */
+#lang-select {
+  width:320px;
+  max-width:90%;
+  padding:0.45rem;
+  border-radius:8px;
+  border:1px solid var(--muted, #e6e6e6);
+  background:#fff;
+  font-size:0.95rem;
+}
+
+/* control buttons */
+.controls-row { display: flex; gap: 0.6rem; align-items: center; }
+.pill {
+  background:#111827;
+  color:#fff;
+  border:none;
+  padding:0.45rem 0.9rem;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:0.95rem;
+}
+.pill[disabled] { opacity:0.5; cursor:not-allowed; }
+
+/* grid: 3 columns, 2 rows for six boxes */
+.peek-grid {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:0.9rem;
+  margin-top:1rem;
+}
+
+/* tile styles */
+.peek {
+  border:1px solid #eef2f6;
+  border-radius:10px;
+  padding:0.6rem;
+  background:#fff;
+  transition: transform .12s ease, box-shadow .12s ease;
+  overflow:hidden;
+}
+.peek[open] { transform: translateY(-6px); box-shadow: 0 8px 24px rgba(17,24,39,0.06); }
+
+.peek__front {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:0.5rem;
+  cursor:pointer;
+  padding:0.05rem 0;
+}
+.peek__word { font-weight:700; font-size:1.05rem; color:#0f172a; }
+.peek__hint { font-size:0.78rem; color:#6b7280; }
+
+.peek__back { margin-top:0.6rem; border-top:1px dashed #f1f5f9; padding-top:0.6rem; }
+.peek__back p { margin:0.18rem 0; font-size:0.95rem; color:#111827; }
+.peek__back .muted { color:#6b7280; }
+
+/* per-language block in expanded view */
+.meaning-row { margin-bottom:0.6rem; }
+.meaning-lang { font-weight:700; font-size:0.9rem; margin-bottom:0.25rem; }
+
+/* responsive: 2 columns on narrow screens, 1 on very small */
+@media (max-width:900px) {
+  .peek-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width:520px) {
+  .peek-grid { grid-template-columns: 1fr; }
+  #lang-select { width:100%; }
+}
+
+/* muted helper */
+.muted { color:#6b7280; font-size:0.9rem; }
