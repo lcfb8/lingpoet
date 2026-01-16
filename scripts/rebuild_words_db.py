@@ -55,7 +55,7 @@ def extract_ipa(entry):
     lang = entry.get("lang", "")
     
     if lang == "English":
-        ga_ipa = None  # General American (cot-caught merger)
+        ga_ipa = None  # General American
         rp_ipa = None  # Received Pronunciation
         
         for sound in sounds:
@@ -64,10 +64,13 @@ def extract_ipa(entry):
             
             ipa = sound["ipa"]
             tags = sound.get("tags", [])
-            note = sound.get("note", "")
             
-            # Look for General American (cot-caught merger)
-            if not ga_ipa and "cot-caught-merger" in tags:
+            # Skip phonetic transcriptions (in brackets), only use phonemic (in slashes)
+            if ipa.startswith("["):
+                continue
+            
+            # Look for General American (either tag or cot-caught-merger)
+            if not ga_ipa and ("General-American" in tags or "cot-caught-merger" in tags):
                 ga_ipa = ipa
             
             # Look for Received Pronunciation

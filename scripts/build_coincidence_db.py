@@ -50,6 +50,10 @@ IPA_MAP = {
     "ə": "e",
     "ɪ": "i",
     "ʊ": "u",
+    "ɹ": "r",  # American English r
+    "ɾ": "r",  # Alveolar tap (Spanish/Turkish r)
+    "ʁ": "r",  # French/German r
+    "ʀ": "r",  # Uvular trill
 }
 
 def normalize_ipa(ipa):
