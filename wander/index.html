@@ -196,20 +196,14 @@
         <header class="section__header">
           <h2 id="peek-title">Sneak peek: tap to reveal</h2>
           <p class="section__lede">
-            Pick up to three languages, click "Go wander" to surface 6 coincident words, then tap a tile to reveal IPA and meanings for the selected languages.
+            Click "Go wander" to surface 6 coincident words that appear in three or more languages in the dataset. Tap a tile to reveal IPA and meanings for up to three languages.
           </p>
         </header>
 
         <div class="peek-controls peek-controls--center">
-          <div class="peek-controls__row">
-            <label for="lang-select">Choose languages (up to 3)</label>
-            <select id="lang-select" multiple size="6" aria-label="Select up to three languages"></select>
-          </div>
-
-          <div class="peek-controls__row">
+          <div class="peek-controls__row" style="justify-content:center;">
             <button id="go-wander" class="pill" disabled>Go wander</button>
-            <button id="randomize" class="pill" disabled>Randomize</button>
-            <div id="status" class="muted">Loading dataset…</div>
+            <div id="status" class="muted" style="margin-left:1rem;">Loading database…</div>
           </div>
         </div>
 
@@ -218,10 +212,17 @@
         </div>
 
         <div class="peek-footer">
-          <p class="muted">
-            Later, Words Studio will let you search and filter the full dataset — and leave your own lines underneath.
-          </p>
-          <a class="pill" href="../words-studio/index.html">Go to Words Studio →</a>
+          <div class="btw__cta" style="width:100%; max-width:950px; margin:0 auto;">
+            <div class="btw__cta-text" style="flex:1; min-width:0;">
+              <h3 class="card__title" style="margin-bottom:0.25rem;">Come & Play</h3>
+              <p class="card__text" style="margin:0;">
+                Explore coincidences. Make unexpected connections. Find something funny. Write your own poetry.
+              </p>
+            </div>
+            <div style="margin-left:1rem;">
+              <a class="btw__button" href="../words-studio/search.html">Open Words Studio →</a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -242,22 +243,19 @@
       (async function () {
         const DB_URL = "https://dhrumil-public.s3.amazonaws.com/code4policy/coincidences.db.gz";
         const statusEl = document.getElementById("status");
-        const langSelect = document.getElementById("lang-select");
         const goBtn = document.getElementById("go-wander");
-        const randBtn = document.getElementById("randomize");
         const grid = document.getElementById("peek-grid");
-        let dataset = []; // {word, ipa, language, meaning}
+        let dataset = []; // rows read from DB only
 
         const setStatus = (s) => { if (statusEl) statusEl.textContent = s; };
 
         try {
-          setStatus("Fetching dataset…");
-          const detectedLangSet = new Set();
-          const res = await fetch(DB_URL);
-          const ab = await res.arrayBuffer();
+          setStatus("Fetching database…");
+          const resp = await fetch(DB_URL);
+          const ab = await resp.arrayBuffer();
           setStatus("Decompressing…");
           const u8 = pako.ungzip(new Uint8Array(ab));
-          setStatus("Initializing SQL engine…");
+          setStatus("Loading SQL engine…");
           const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
           const db = new SQL.Database(u8);
 
@@ -267,138 +265,81 @@
 
           function detectCols(table) {
             try {
-              const info = db.exec("PRAGMA table_info(\"" + table + "\")");
+              const info = db.exec(`PRAGMA table_info("${table}")`);
               if (!info[0]) return null;
               const cols = info[0].values.map(r => r[1].toLowerCase());
               const find = (rx) => cols.find(c => c.match(rx));
               return {
                 word: find(/word|token|lemma|entry/),
                 ipa: find(/ipa|pron|pronunciation/),
-                lang: find(/lang|language|iso/),
+                lang: find(/lang|language|iso|locale/),
                 meaning: find(/meaning|definition|gloss|translation|def/)
               };
             } catch (e) { return null; }
           }
 
+          // Read rows from all usable tables (no hardcoded dataset)
           for (const t of tables) {
             const cols = detectCols(t);
-            if (!cols || !cols.word || !cols.lang) continue;
-            const sel = [cols.word, cols.ipa, cols.lang, cols.meaning].filter(Boolean).map(c => `"${c}"`).join(", ");
+            if (!cols || !cols.word) continue;
+            const selCols = [cols.word, cols.ipa, cols.lang, cols.meaning].filter(Boolean).map(c => `"${c}"`).join(", ");
             try {
-              const r = db.exec(`SELECT ${sel} FROM "${t}" LIMIT 5000`);
-              if (!r[0]) continue;
-              const colsNames = r[0].columns.map(c => c.toLowerCase());
-              for (const row of r[0].values) {
+              const rowsRes = db.exec(`SELECT ${selCols} FROM "${t}" LIMIT 20000`);
+              if (!rowsRes[0]) continue;
+              const colNames = rowsRes[0].columns.map(c => c.toLowerCase());
+              for (const row of rowsRes[0].values) {
                 const obj = {};
-                for (let i = 0; i < colsNames.length; i++) obj[colsNames[i]] = row[i];
+                for (let i = 0; i < colNames.length; i++) obj[colNames[i]] = row[i];
                 dataset.push({
-                  word: obj[colsNames.find(n=>n.match(/word|token|lemma|entry/))] || "",
-                  ipa: obj[colsNames.find(n=>n.match(/ipa|pron/))] || "",
-                  language: String(obj[colsNames.find(n=>n.match(/lang|language|iso/))] || ""),
-                  meaning: obj[colsNames.find(n=>n.match(/meaning|definition|gloss|translation|def/))] || ""
+                  word: obj[colNames.find(n=>n.match(/word|token|lemma|entry/))] || "",
+                  ipa: obj[colNames.find(n=>n.match(/ipa|pron/))] || "",
+                  language: String(obj[colNames.find(n=>n.match(/lang|language|iso|locale/))] || ""),
+                  meaning: obj[colNames.find(n=>n.match(/meaning|definition|gloss|translation|def/))] || ""
                 });
               }
-            } catch (e) { /* ignore bad table */ }
-
-            // Collect distinct language values directly from table (more robust)
-            try {
-              const langCol = cols && cols.lang ? cols.lang : null;
-              if (langCol) {
-                const langsRes = db.exec(`SELECT DISTINCT "${langCol}" AS lang FROM "${t}"`);
-                if (langsRes && langsRes[0] && langsRes[0].values) {
-                  for (const row of langsRes[0].values) {
-                    if (row[0]) detectedLangSet.add(String(row[0]));
-                  }
-                }
-              }
-            } catch (e) { /* ignore distinct-lang errors */ }
+            } catch (e) { /* ignore table read errors */ }
           }
 
           if (dataset.length === 0) {
-            setStatus("No usable rows found — using fallback sample.");
-            dataset = [
-              {word:"gift", ipa:"/ɡɪft/", language:"en", meaning:"present"},
-              {word:"gift", ipa:"/ɡɪft/", language:"no", meaning:"poison"},
-              {word:"gate", ipa:"/ɡeɪt/", language:"en", meaning:"door"},
-              {word:"gate", ipa:"/ɡɑːtə/", language:"no", meaning:"street"},
-              {word:"smell", ipa:"/smɛl/", language:"en", meaning:"odor"},
-              {word:"time", ipa:"/taɪm/", language:"en", meaning:"time"}
-            ];
-          } else {
-            setStatus(`Loaded ${dataset.length} rows.`);
+            setStatus("Database read succeeded but no usable rows found.");
+            goBtn.disabled = true;
+            return;
           }
 
-          // prefer languages found via DISTINCT queries; otherwise derive from parsed rows
-          const langs = detectedLangSet.size ? Array.from(detectedLangSet).sort()
-                      : Array.from(new Set(dataset.map(d=>d.language).filter(Boolean))).sort();
-          if (langs.length === 0) langs.push("en","no","sv");
-          for (const l of langs) {
-            const opt = document.createElement("option");
-            opt.value = l; opt.textContent = l;
-            langSelect.appendChild(opt);
+          // index by word and collect language sets
+          const byWord = {};
+          for (const r of dataset) {
+            if (!r.word) continue;
+            byWord[r.word] = byWord[r.word] || { rows: [], langs: new Set() };
+            byWord[r.word].rows.push(r);
+            if (r.language) byWord[r.word].langs.add(String(r.language));
           }
-          console.log("populated languages:", langs);
-          setStatus("Choose up to 3 languages and click Go wander.");
-          goBtn.disabled = false;
-          randBtn.disabled = false;
 
-          langSelect.addEventListener("change", () => {
-            const selected = Array.from(langSelect.selectedOptions);
-            if (selected.length > 3) selected[selected.length - 1].selected = false;
-          });
+          // candidates: words present in >=3 distinct languages
+          const primaryCandidates = Object.entries(byWord).filter(([w,v]) => v.langs.size >= 3).map(([w]) => w);
+          // secondary: >=2 languages
+          const secondaryCandidates = Object.entries(byWord).filter(([w,v]) => v.langs.size === 2).map(([w]) => w);
+          // fallback: any word
+          const allWords = Object.keys(byWord);
 
           function shuffle(a){ for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
 
-          function pickCandidates(selectedLangs){
-            // If user selected 2+ languages: pick words that appear in >=2 of those languages
-            const byWord = {};
-            for (const e of dataset) {
-              if (!e.word) continue;
-              byWord[e.word] = byWord[e.word] || [];
-              byWord[e.word].push(e);
-            }
-            const candidates = [];
-            for (const [word, entries] of Object.entries(byWord)) {
-              const langsInSelection = Array.from(new Set(entries.filter(en => selectedLangs.length ? selectedLangs.includes(String(en.language)) : true).map(en => en.language)));
-              // require at least 2 different languages among selected languages
-              if (selectedLangs.length >= 2) {
-                if (langsInSelection.filter(Boolean).length >= 2) candidates.push(word);
-              } else if (selectedLangs.length === 1) {
-                // one language selected: prefer words that have multiple distinct meanings in that language or also appear cross-language
-                const lang = selectedLangs[0];
-                const meaningsInLang = Array.from(new Set(entries.filter(en=>String(en.language)===lang).map(en => en.meaning))).filter(Boolean);
-                if (meaningsInLang.length >= 2) candidates.push(word);
-                else {
-                  // fallback: include words that appear in other languages too
-                  const otherLangs = Array.from(new Set(entries.map(en=>en.language))).filter(l=>l && l!==lang);
-                  if (otherLangs.length > 0) candidates.push(word);
-                }
-              } else {
-                // no selection: prefer words that appear in multiple languages overall
-                const allLangs = Array.from(new Set(entries.map(en => en.language))).filter(Boolean);
-                if (allLangs.length >= 2) candidates.push(word);
-              }
-            }
-            return shuffle(candidates);
-          }
-
-          function pickRandomWords(selectedLangs){
-            const candidates = pickCandidates(selectedLangs);
-            const chosen = candidates.slice(0,6);
-            // supplement if not enough
+          function pickRandomWords() {
+            const chosen = [];
+            const p = shuffle(primaryCandidates.slice());
+            for (const w of p) { if (chosen.length===6) break; chosen.push(w); }
             if (chosen.length < 6) {
-              const allWords = shuffle(Array.from(new Set(dataset.map(d=>d.word)).values()));
-              for (const w of allWords) {
-                if (chosen.includes(w)) continue;
-                chosen.push(w);
-                if (chosen.length === 6) break;
-              }
+              const s = shuffle(secondaryCandidates.slice());
+              for (const w of s) { if (chosen.length===6) break; if (!chosen.includes(w)) chosen.push(w); }
             }
-            // build representative items with word, and for rendering we'll lookup by language
-            return chosen.map(w => ({ word: w }));
+            if (chosen.length < 6) {
+              const rest = shuffle(allWords.slice());
+              for (const w of rest) { if (chosen.length===6) break; if (!chosen.includes(w)) chosen.push(w); }
+            }
+            return chosen.slice(0,6).map(w => ({ word: w }));
           }
 
-          function renderTiles(items, selectedLangs){
+          function renderTiles(items){
             grid.innerHTML = "";
             for (const it of items) {
               const details = document.createElement("details");
@@ -418,23 +359,20 @@
               const back = document.createElement("div");
               back.className = "peek__back";
 
-              // For each selected language (or up to 3 top langs if none selected), show IPA + meaning(s)
-              const langsToShow = selectedLangs.length ? selectedLangs : Array.from(new Set(dataset.map(d=>d.language))).slice(0,3);
-              for (const lang of langsToShow) {
-                const rows = dataset.filter(d => d.word === it.word && String(d.language) === String(lang));
-                const wrapper = document.createElement("div");
-                wrapper.className = "meaning-row";
-                const langLabel = document.createElement("div");
-                langLabel.className = "meaning-lang";
-                langLabel.textContent = lang;
-                wrapper.appendChild(langLabel);
+              const info = byWord[it.word] || { rows: [], langs: new Set() };
+              const langs = Array.from(info.langs).slice(0,3);
+              if (langs.length === 0) {
+                back.innerHTML = "<p class='muted'>No entries found for this word.</p>";
+              } else {
+                for (const lang of langs) {
+                  const rows = info.rows.filter(r => String(r.language) === String(lang));
+                  const wrapper = document.createElement("div");
+                  wrapper.className = "meaning-row";
+                  const langLabel = document.createElement("div");
+                  langLabel.className = "meaning-lang";
+                  langLabel.textContent = lang;
+                  wrapper.appendChild(langLabel);
 
-                if (rows.length === 0) {
-                  const p = document.createElement("p");
-                  p.innerHTML = "<em class='muted'>No entry</em>";
-                  wrapper.appendChild(p);
-                } else {
-                  // collect unique IPA and meanings
                   const ipas = Array.from(new Set(rows.map(r=>r.ipa).filter(Boolean)));
                   const meanings = Array.from(new Set(rows.map(r=>r.meaning).filter(Boolean)));
                   if (ipas.length) {
@@ -449,53 +387,38 @@
                       wrapper.appendChild(mEl);
                     }
                   }
+                  if (!ipas.length && !meanings.length) {
+                    const p = document.createElement("p");
+                    p.innerHTML = "<em class='muted'>No entry</em>";
+                    wrapper.appendChild(p);
+                  }
+                  back.appendChild(wrapper);
                 }
-                back.appendChild(wrapper);
               }
 
               details.appendChild(back);
               grid.appendChild(details);
             }
-            randBtn.disabled = false;
           }
 
-          goBtn.addEventListener("click", ()=>{
-            const selectedLangs = Array.from(langSelect.selectedOptions).map(o=>o.value);
-            if (selectedLangs.length === 0) {
-              alert("Select at least one language (up to 3).");
-              return;
-            }
-            setStatus("Generating words…");
-            const items = pickRandomWords(selectedLangs);
-            renderTiles(items, selectedLangs);
-            setStatus("Tap a tile to reveal IPA and meanings.");
-          });
+          // enable Go wander only if at least one primary candidate exists (prefer >=3-lang coincidences)
+          const hasPrimary = primaryCandidates.length > 0;
+          if (!hasPrimary) setStatus("No words found that appear in 3+ languages — Go wander will still try.");
+          else setStatus("Ready. Click Go wander to surface words with coincidences across 3+ languages.");
+          goBtn.disabled = false;
 
-          randBtn.addEventListener("click", ()=>{
-            const selectedLangs = Array.from(langSelect.selectedOptions).map(o=>o.value);
-            const items = pickRandomWords(selectedLangs);
-            renderTiles(items, selectedLangs);
-            setStatus("Randomized.");
+          goBtn.addEventListener("click", ()=>{
+            setStatus("Generating words…");
+            const items = pickRandomWords();
+            renderTiles(items);
+            setStatus("Tap a tile to reveal IPA and meanings.");
+            grid.scrollIntoView({ behavior: "smooth", block: "start" });
           });
 
         } catch (err) {
           console.error(err);
-          setStatus("Failed to load dataset; using fallback sample.");
-          dataset = [
-            {word:"gift", ipa:"/ɡɪft/", language:"en", meaning:"present"},
-            {word:"gift", ipa:"/ɡɪft/", language:"no", meaning:"poison"},
-            {word:"gate", ipa:"/ɡeɪt/", language:"en", meaning:"door"},
-            {word:"gate", ipa:"/ɡɑːtə/", language:"no", meaning:"street"},
-            {word:"smell", ipa:"/smɛl/", language:"en", meaning:"odor"},
-            {word:"time", ipa:"/taɪm/", language:"en", meaning:"time"}
-          ];
-          const langs = Array.from(new Set(dataset.map(d=>d.language)));
-          for (const l of langs) {
-            const opt = document.createElement("option"); opt.value = l; opt.textContent = l; langSelect.appendChild(opt);
-          }
-          setStatus("Fallback ready — choose languages and click Go wander.");
-          goBtn.disabled = false;
-          randBtn.disabled = false;
+          setStatus("Failed to load database — Sneak peek disabled.");
+          goBtn.disabled = true;
         }
       })();
     </script>
