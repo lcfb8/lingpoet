@@ -1,65 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>LingPoet - Word Coincidences</title>
+    <title>Words Studio | LingPoet</title>
     <link rel="stylesheet" href="search.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🌍 LingPoet</h1>
-            <p>Find words that coincidentally match across languages</p>
-        </header>
+    <!-- Top Navigation -->
+    <header class="topbar">
+      <nav class="nav" aria-label="Primary navigation">
+        <!-- Left: search icon placeholder -->
+        <a class="nav__icon" href="#" aria-label="Search">⌕</a>
 
-        <div class="search-section">
-            <div class="search-tabs">
-                <button class="tab-button active" onclick="switchTab('spelling', this)">Search by Spelling</button>
-                <button class="tab-button" onclick="switchTab('ipa', this)">Search by IPA Pronunciation (beta)</button>
+        <!-- Center brand -->
+        <a class="nav__brand" href="../index.html">LINGPOET</a>
+
+        <!-- Center links -->
+        <ul class="nav__links">
+          <li><a href="../index.html">Behind the Words</a></li>
+          <li><a href="../wander/index.html">Wander</a></li>
+          <li><a href="search.html" class="active">Words Studio</a></li>
+          <li><a href="../who-we-are/index.html">Who We Are</a></li>
+        </ul>
+
+      </nav>
+    </header>
+
+    <main class="studio-main">
+        <div class="container">
+            <div class="studio-header">
+                <h1>Words Studio</h1>
+                <p>Find words that coincidentally match across languages</p>
             </div>
 
-            <input type="text" id="searchInput" placeholder="Type a word to find coincidences..." onkeyup="debounceSearch()">
+            <div class="search-section">
+                <div class="search-tabs">
+                    <button class="tab-button active" onclick="switchTab('spelling', this)">Search by Spelling</button>
+                    <button class="tab-button" onclick="switchTab('ipa', this)">Search by IPA Pronunciation (beta)</button>
+                </div>
 
-            <div class="language-filter-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-                    <strong id="languageFilterLabel">Filter by language (top 120 languages by number of coincidences):</strong>
-                    <div class="lang-mode-buttons">
-                        <button id="langMode-top120" class="lang-mode-btn active" onclick="setLanguageMode('top120')">Top 120</button>
-                        <button id="langMode-top500" class="lang-mode-btn" onclick="setLanguageMode('top500')">Top 500</button>
-                        <button id="langMode-all" class="lang-mode-btn" onclick="setLanguageMode('all')">All 2446 languages</button>
+                <input type="text" id="searchInput" placeholder="Type a word to find coincidences..." onkeyup="debounceSearch()">
+
+                <div class="language-filter-section">
+                    <div class="filter-header">
+                        <strong id="languageFilterLabel">Filter by language (top 120 languages by number of coincidences):</strong>
+                        <div class="lang-mode-buttons">
+                            <button id="langMode-top120" class="lang-mode-btn active" onclick="setLanguageMode('top120')">Top 120</button>
+                            <button id="langMode-top500" class="lang-mode-btn" onclick="setLanguageMode('top500')">Top 500</button>
+                            <button id="langMode-all" class="lang-mode-btn" onclick="setLanguageMode('all')">All 2446 languages</button>
+                        </div>
                     </div>
+                    
+                    <!-- Multi-select dropdown -->
+                    <div class="language-dropdown" id="languageDropdown">
+                        <div class="dropdown-trigger" onclick="toggleDropdown()">
+                            <span class="dropdown-placeholder" id="dropdownPlaceholder">Select languages...</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <div class="dropdown-search">
+                                <input type="text" id="languageSearchInput" placeholder="Search languages..." oninput="filterLanguageList()">
+                            </div>
+                            <div class="dropdown-list" id="languageList">
+                                Loading...
+                            </div>
+                            <div class="dropdown-actions">
+                                <button class="dropdown-clear" onclick="clearLanguageSelection()">Clear All</button>
+                                <button class="dropdown-apply" onclick="applyLanguageFilter()">Apply Filter</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected languages tags -->
+                    <div class="selected-languages" id="selectedLanguagesTags"></div>
                 </div>
-                
-                <!-- Multi-select dropdown -->
-                <div class="language-dropdown" id="languageDropdown">
-                    <div class="dropdown-trigger" onclick="toggleDropdown()">
-                        <span class="dropdown-placeholder" id="dropdownPlaceholder">Select languages...</span>
-                        <span class="dropdown-arrow">▼</span>
-                    </div>
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <div class="dropdown-search">
-                            <input type="text" id="languageSearchInput" placeholder="Search languages..." oninput="filterLanguageList()">
-                        </div>
-                        <div class="dropdown-list" id="languageList">
-                            Loading...
-                        </div>
-                        <div class="dropdown-actions">
-                            <button class="dropdown-clear" onclick="clearLanguageSelection()">Clear All</button>
-                            <button class="dropdown-apply" onclick="applyLanguageFilter()">Apply Filter</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Selected languages tags -->
-                <div class="selected-languages" id="selectedLanguagesTags"></div>
+            </div>
+
+            <div class="results-section">
+                <div id="results"></div>
             </div>
         </div>
-
-        <div class="results-section">
-            <div id="results"></div>
-        </div>
-    </div>
+    </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <script src="search.js"></script>
