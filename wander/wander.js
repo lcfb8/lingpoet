@@ -22,44 +22,49 @@
     setStatus("Discovering tables…");
     const tablesRes = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
     const tables = (tablesRes[0] && tablesRes[0].values) ? tablesRes[0].values.map(r => r[0]) : [];
+    console.log('📊 Found tables:', tables);
 
-    function detectCols(table) {
-      try {
-        const info = db.exec(`PRAGMA table_info("${table}")`);
-        if (!info[0]) return null;
-        const cols = info[0].values.map(r => r[1].toLowerCase());
-        const find = (rx) => cols.find(c => c.match(rx));
-        return {
-          word: find(/word|token|lemma|entry/),
-          ipa: find(/ipa|pron|pronunciation/),
-          lang: find(/lang|language|iso|locale/),
-          meaning: find(/meaning|definition|gloss|translation|def/)
-        };
-      } catch (e) { return null; }
-    }
-
-    // Read rows from all usable tables (no hardcoded dataset)
+    // Read rows from match tables (spelling_matches, pronunciation_matches)
     for (const t of tables) {
-      const cols = detectCols(t);
-      if (!cols || !cols.word) continue;
-      const selCols = [cols.word, cols.ipa, cols.lang, cols.meaning].filter(Boolean).map(c => `"${c}"`).join(", ");
+      if (t === 'sqlite_sequence') continue; // skip internal table
+      
       try {
-        const rowsRes = db.exec(`SELECT ${selCols} FROM "${t}" LIMIT 20000`);
-        if (!rowsRes[0]) continue;
-        const colNames = rowsRes[0].columns.map(c => c.toLowerCase());
-        for (const row of rowsRes[0].values) {
-          const obj = {};
-          for (let i = 0; i < colNames.length; i++) obj[colNames[i]] = row[i];
-          dataset.push({
-            word: obj[colNames.find(n=>n.match(/word|token|lemma|entry/))] || "",
-            ipa: obj[colNames.find(n=>n.match(/ipa|pron/))] || "",
-            language: String(obj[colNames.find(n=>n.match(/lang|language|iso|locale/))] || ""),
-            meaning: obj[colNames.find(n=>n.match(/meaning|definition|gloss|translation|def/))] || ""
-          });
+        console.log(`✅ Processing table "${t}"`);
+        const rowsRes = db.exec(`SELECT match_key, languages, entries FROM "${t}" LIMIT 20000`);
+        if (!rowsRes[0]) {
+          console.log(`⚠️  No results from table "${t}"`);
+          continue;
         }
-      } catch (e) { /* ignore table read errors */ }
+        console.log(`📥 Read ${rowsRes[0].values.length} rows from "${t}"`);
+        
+        for (const row of rowsRes[0].values) {
+          const [matchKey, languages, entriesJson] = row;
+          let entries;
+          try {
+            entries = JSON.parse(entriesJson);
+          } catch (e) {
+            console.log(`⚠️  Failed to parse entries for match_key "${matchKey}"`);
+            continue;
+          }
+          
+          // Each entry in the JSON has the word data
+          if (Array.isArray(entries)) {
+            for (const entry of entries) {
+              dataset.push({
+                word: entry.word || matchKey || "",
+                ipa: entry.ipa || "",
+                language: entry.lang || entry.lang_code || "",
+                meaning: entry.glosses || entry.gloss || entry.meaning || ""
+              });
+            }
+          }
+        }
+      } catch (e) { 
+        console.log(`❌ Error processing table "${t}":`, e);
+      }
     }
 
+    console.log(`📊 Total dataset size: ${dataset.length} rows`);
     if (dataset.length === 0) {
       setStatus("Database read succeeded but no usable rows found.");
       goBtn.disabled = true;
