@@ -378,6 +378,18 @@ async function searchDatabase(query) {
     const rows = result[0].values;
     const results = [];
 
+    // Build the list of allowed languages based on languageMode
+    let allowedLanguages = null;  // null means no restriction
+    if (selectedLanguages.length === 0) {
+        // If no specific languages selected, filter by language mode (top 120, top 500, or all)
+        if (languageMode === 'top120') {
+            allowedLanguages = new Set(allLanguagesData.slice(0, TOP_120_COUNT).map(l => l.lang));
+        } else if (languageMode === 'top500') {
+            allowedLanguages = new Set(allLanguagesData.slice(0, TOP_500_COUNT).map(l => l.lang));
+        }
+        // If languageMode is 'all', allowedLanguages stays null (no restriction)
+    }
+
     for (const row of rows) {
         try {
             let entries = JSON.parse(row[3]);
@@ -393,6 +405,10 @@ async function searchDatabase(query) {
             // Filter by selected languages if any
             if (selectedLanguages.length > 0) {
                 entries = entries.filter(e => selectedLanguages.includes(e.lang));
+                if (entries.length < 2) continue;
+            } else if (allowedLanguages !== null) {
+                // Filter by language mode (top 120, top 500, or all)
+                entries = entries.filter(e => allowedLanguages.has(e.lang));
                 if (entries.length < 2) continue;
             }
 
