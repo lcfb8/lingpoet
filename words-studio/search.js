@@ -30,6 +30,39 @@ function normalizeIpa(ipa) {
     return ipa;
 }
 
+// Fetch a gzip-compressed file and return its ArrayBuffer (uses native DecompressionStream when available)
+async function fetchGzipArrayBuffer(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error('Database file not found. Please check the S3 URL.');
+    }
+
+    // Prefer native streaming decompression when supported
+    if (response.body && typeof DecompressionStream !== 'undefined') {
+        const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
+        return await new Response(decompressedStream).arrayBuffer();
+    }
+
+    // Fallback: download whole file and decompress via pako
+    const compressedBuffer = await response.arrayBuffer();
+    if (typeof window.pako === 'undefined') {
+        await loadPako();
+    }
+    const decompressed = window.pako.ungzip(new Uint8Array(compressedBuffer));
+    return decompressed.buffer;
+}
+
+// Lazy-load pako only if needed for gzip fallback
+function loadPako() {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js';
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load gzip decompressor.'));
+        document.head.appendChild(script);
+    });
+}
+
 // Initialize database
 async function initDatabase() {
     const resultsDiv = document.getElementById('results');
@@ -43,13 +76,8 @@ async function initDatabase() {
             locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
         });
 
-        // Load the database file from S3
-        const response = await fetch('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db');
-        if (!response.ok) {
-            throw new Error('Database file not found. Please check the S3 URL.');
-        }
-
-        const buffer = await response.arrayBuffer();
+        // Load the gzip-compressed database file from S3 and decompress in browser
+        const buffer = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/coincidences.db.gz');
         db = new SQL.Database(new Uint8Array(buffer));
 
         resultsDiv.innerHTML = '<div class="no-results">Enter a search term to find coincidences</div>';
@@ -59,7 +87,7 @@ async function initDatabase() {
 
     } catch (error) {
         console.error('Database initialization error:', error);
-        resultsDiv.innerHTML = `<div class="error">Error loading database: ${error.message}<br><br>Make sure data/coincidences.db exists in the project directory.</div>`;
+        resultsDiv.innerHTML = `<div class="error">Error loading database: ${error.message}<br><br>Make sure data/coincidences.db.gz exists in the project directory.</div>`;
         languageFilterDiv.innerHTML = '<em>Database not loaded</em>';
     }
 }
