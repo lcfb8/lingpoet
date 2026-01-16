@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wander — LingPoet</title>
     <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -196,84 +197,33 @@
         <header class="section__header">
           <h2 id="peek-title">Sneak peek: tap to reveal</h2>
           <p class="section__lede">
-            Little tiles from the dataset. Click a word to reveal meanings.
-            (No JavaScript needed — we use <code>&lt;details&gt;</code>.)
+            Click "Go wander" to surface 6 coincident words that appear in three or more languages in the dataset. Tap a tile to reveal IPA and meanings for up to three languages.
           </p>
         </header>
 
-        <div class="peek-grid">
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">gift</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> a present</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
+        <div class="peek-controls peek-controls--center">
+          <div class="peek-controls__row" style="justify-content:center;">
+            <button id="go-wander" class="pill" disabled>Go wander</button>
+            <div id="status" class="muted" style="margin-left:1rem;">Loading database…</div>
+          </div>
+        </div>
 
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">barn</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> a farm building</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
-
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">rom</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> rum (sound/shape)</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
-
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">time</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> time</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
-
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">fine</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>English:</strong> okay / good</p>
-              <p><strong>Norwegian:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
-
-          <details class="peek">
-            <summary class="peek__front">
-              <span class="peek__word">skam</span>
-              <span class="peek__hint">tap to reveal</span>
-            </summary>
-            <div class="peek__back">
-              <p><strong>Norwegian:</strong> shame (example)</p>
-              <p><strong>English:</strong> (placeholder meaning)</p>
-            </div>
-          </details>
+        <div id="peek-grid" class="peek-grid" aria-live="polite" role="list">
+          <!-- six tiles injected here -->
         </div>
 
         <div class="peek-footer">
-          <p class="muted">
-            Later, Words Studio will let you search and filter the full dataset — and leave your own lines underneath.
-          </p>
-          <a class="pill" href="../words-studio/index.html">Go to Words Studio →</a>
+          <div class="btw__cta" style="width:100%; max-width:950px; margin:0 auto;">
+            <div class="btw__cta-text" style="flex:1; min-width:0;">
+              <h3 class="card__title" style="margin-bottom:0.25rem;">Come & Play</h3>
+              <p class="card__text" style="margin:0;">
+                Explore coincidences. Make unexpected connections. Find something funny. Write your own poetry.
+              </p>
+            </div>
+            <div style="margin-left:1rem;">
+              <a class="btw__button" href="../words-studio/search.html">Open Words Studio →</a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -286,5 +236,10 @@
         <p>Created at Harvard Kennedy School</p>
       </div>
     </footer>
+
+    <!-- libs: pako for gunzip and sql.js for SQLite parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+    <script src="wander.js"></script>
   </body>
 </html>

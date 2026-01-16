@@ -22,6 +22,7 @@ const IPA_MAP = {
     "ŋ": "ng", "ɲ": "ny", "ʧ": "ch", "ʤ": "j",
     "ɑ": "a", "ɒ": "a", "æ": "a", "ʌ": "a",
     "ɔ": "o", "ɜ": "e", "ə": "e", "ɪ": "i", "ʊ": "u",
+    "ɹ": "r", "ɾ": "r", "ʁ": "r", "ʀ": "r",  // Various r sounds
 };
 
 const IPA_STRIP = /[\[\]/ˈˌ\s]/g;
@@ -83,8 +84,10 @@ async function initDatabase() {
             locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
         });
 
-        // Load the gzip-compressed database file from S3 and decompress in browser
-        const buffer = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/coincidences.db.gz');
+        // TEMPORARY: Load local database for testing (switch back to S3 for production)
+        // const buffer = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz');
+        const response = await fetch('../data/coincidences.db');
+        const buffer = await response.arrayBuffer();
         db = new SQL.Database(new Uint8Array(buffer));
 
         resultsDiv.innerHTML = '<div class="no-results">Enter a search term to find coincidences</div>';
@@ -302,11 +305,12 @@ function setLanguageMode(mode) {
 
 function switchTab(tab, button) {
     currentTab = tab;
+    console.log('switchTab called, currentTab is now:', currentTab);
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
 
     document.getElementById('searchInput').placeholder =
-        tab === 'spelling' ? 'Type a word to find coincidences...' : 'Type IPA pronunciation...';
+        tab === 'spelling' ? 'Type a word to find coincidences...' : 'Type an IPA pronunciation (e.g., /pɪn/ or pin)...';
 
     performSearch();
 }
@@ -340,24 +344,57 @@ async function performSearch() {
 
 async function searchDatabase(query) {
     const table = currentTab === 'spelling' ? 'spelling_matches' : 'pronunciation_matches';
-    const searchKey = currentTab === 'spelling' ? query.toLowerCase() : normalizeIpa(query);
+    let searchKey = query.toLowerCase();
 
     if (searchKey.length < 2) return [];
 
-    const sql = `
-        SELECT match_key, languages, gloss_overlap, entries
-        FROM ${table}
-        WHERE match_key LIKE ?
-        ORDER BY languages DESC
-        LIMIT 100
-    `;
-
-    const result = db.exec(sql, [`%${searchKey}%`]);
+    let sql, result;
+    
+    console.log('searchDatabase called with currentTab:', currentTab, 'query:', query);
+    
+    if (currentTab === 'spelling') {
+        // For spelling, search by match_key directly
+        sql = `
+            SELECT match_key, languages, gloss_overlap, entries
+            FROM ${table}
+            WHERE match_key LIKE ?
+            ORDER BY languages DESC
+            LIMIT 100
+        `;
+        console.log('Searching spelling_matches with:', searchKey);
+        result = db.exec(sql, [`%${searchKey}%`]);
+    } else {
+        // For pronunciation, normalize IPA and search by match_key
+        searchKey = normalizeIpa(query);
+        if (searchKey.length < 2) return [];
+        
+        sql = `
+            SELECT match_key, languages, gloss_overlap, entries
+            FROM pronunciation_matches
+            WHERE match_key LIKE ?
+            ORDER BY languages DESC
+            LIMIT 100
+        `;
+        console.log('Searching pronunciation_matches with normalized IPA:', searchKey);
+        result = db.exec(sql, [`%${searchKey}%`]);
+    }
 
     if (result.length === 0) return [];
 
     const rows = result[0].values;
     const results = [];
+
+    // Build the list of allowed languages based on languageMode
+    let allowedLanguages = null;  // null means no restriction
+    if (selectedLanguages.length === 0) {
+        // If no specific languages selected, filter by language mode (top 120, top 500, or all)
+        if (languageMode === 'top120') {
+            allowedLanguages = new Set(allLanguagesData.slice(0, TOP_120_COUNT).map(l => l.lang));
+        } else if (languageMode === 'top500') {
+            allowedLanguages = new Set(allLanguagesData.slice(0, TOP_500_COUNT).map(l => l.lang));
+        }
+        // If languageMode is 'all', allowedLanguages stays null (no restriction)
+    }
 
     for (const row of rows) {
         try {
@@ -366,6 +403,10 @@ async function searchDatabase(query) {
             // Filter by selected languages if any
             if (selectedLanguages.length > 0) {
                 entries = entries.filter(e => selectedLanguages.includes(e.lang));
+                if (entries.length < 2) continue;
+            } else if (allowedLanguages !== null) {
+                // Filter by language mode (top 120, top 500, or all)
+                entries = entries.filter(e => allowedLanguages.has(e.lang));
                 if (entries.length < 2) continue;
             }
 
@@ -402,6 +443,7 @@ function renderResults(results) {
     container.innerHTML = results.map(result => {
         const entries = result.entries.map(e => `
             <div class="entry">
+                <div class="entry-word">${escapeHtml(e.word)}</div>
                 <div class="entry-header">
                     <span class="entry-lang">${escapeHtml(e.lang)} (${escapeHtml(e.lang_code || '?')})</span>
                     ${e.ipa ? `<span class="entry-ipa">${escapeHtml(e.ipa)}</span>` : ''}

@@ -188,7 +188,7 @@ a:hover { border-bottom-color: var(--ink); }
 .hero__content {
   position: absolute;
   left: 50%;
-  bottom: 3rem;
+  bottom: 5rem;
   transform: translateX(-50%);
   width: min(920px, calc(100% - 3rem));
   text-align: center;
@@ -857,6 +857,14 @@ input[type="text"]::placeholder {
   margin-top: 0.65rem;
 }
 
+.entry-word {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  font-family: var(--serif);
+}
+
 .entry-header {
   display: flex;
   justify-content: space-between;
@@ -1303,10 +1311,29 @@ input[type="text"]::placeholder {
 .peek-footer {
   margin-top: 1.5rem;
   display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 1.25rem;
+}
+
+.peek-footer .btw__cta {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* ensure button and text scale nicely on small screens */
+@media (max-width: 700px) {
+  .peek-footer .btw__cta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .peek-footer .btw__cta .btw__button {
+    justify-self: end;
+  }
 }
 
 /* ========================================
@@ -1663,3 +1690,79 @@ input[type="text"]::placeholder {
   .together-grid { max-width: 100%; }
   .together-card { max-width: 100%; }
 }
+/* Peek controls and interactive tiles */
+.peek-controls {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  align-items: start;
+}
+.peek-controls label { font-weight: 600; }
+
+/* Peek controls centered layout */
+.peek-controls--center {
+  max-width: 980px;
+  margin: 0 auto 1rem;
+  padding: 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+  box-sizing: border-box;
+}
+.peek-controls__row {
+  width: 100%;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Grid of 3x2 tiles, centered and matching homepage container width */
+.peek-grid {
+  max-width: 980px;
+  margin: 1rem auto;
+  padding: 0 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  box-sizing: border-box;
+}
+
+/* Tiles stretch to container width and match card visuals used site-wide */
+.peek {
+  width: 100%;
+  border-radius: 10px;
+  background: var(--card-bg, #fff);
+  border: 1px solid rgba(16,24,40,0.06);
+  padding: 0.6rem;
+  transition: transform .12s ease, box-shadow .12s ease;
+  overflow: hidden;
+}
+.peek[open] { transform: translateY(-6px); box-shadow: 0 8px 24px rgba(17,24,39,0.06); }
+
+/* CTA panel styling to match homepage "Come and Play" card */
+.panel--cta {
+  max-width: 980px;
+  margin: 1rem auto;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(16,24,40,0.06);
+  background: var(--panel-bg, #fff);
+  box-shadow: 0 6px 20px rgba(15,23,42,0.03);
+  box-sizing: border-box;
+}
+
+/* Keep responsive behavior identical to homepage */
+@media (max-width: 900px) {
+  .peek-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .peek-grid { grid-template-columns: 1fr; }
+  .peek-controls--center,
+  .panel--cta { padding: 0 0.9rem; }
+}
+
+/* muted helper */
+.muted { color:#6b7280; font-size:0.9rem; }
