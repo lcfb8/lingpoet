@@ -104,13 +104,22 @@ def is_affix(word):
     return word.startswith("-") or word.endswith("-")
 
 
+def has_digits(word):
+    """Check if word contains any digits (e.g., '4x4', '311')"""
+    return any(c.isdigit() for c in word)
+
+
 def is_loanword(entry):
-    """Check if entry is a loanword based on etymology"""
+    """Check if entry is a loanword based on etymology.
+    
+    Detects phrases like "borrowed from" and "unadapted borrowing from"
+    which indicate the word was taken from another language.
+    """
     etymology = entry.get("etymology_text", "") or entry.get("etymology", "")
     if not etymology:
         return False
     etymology_lower = etymology.lower()
-    return "borrowed from" in etymology_lower
+    return "borrowed from" in etymology_lower or "unadapted borrowing from" in etymology_lower
 
 
 def process_data():
@@ -160,6 +169,7 @@ def process_data():
     count = 0
     skipped = 0
     skipped_affixes = 0
+    skipped_digits = 0
     skipped_loanwords = 0
     batch = []
     
@@ -185,6 +195,11 @@ def process_data():
             # Skip prefixes and suffixes (e.g., "-able", "un-")
             if is_affix(word):
                 skipped_affixes += 1
+                continue
+            
+            # Skip words with digits (e.g., "4x4", "311")
+            if has_digits(word):
+                skipped_digits += 1
                 continue
             
             # Skip loanwords (etymology contains "borrowed from")
@@ -228,6 +243,7 @@ def process_data():
     print(f"✓ Read {count:,} entries")
     print(f"  - Skipped {skipped:,} (short/no glosses)")
     print(f"  - Skipped {skipped_affixes:,} affixes (prefixes/suffixes)")
+    print(f"  - Skipped {skipped_digits:,} words with digits")
     print(f"  - Skipped {skipped_loanwords:,} loanwords")
     
     # Get unique word count
