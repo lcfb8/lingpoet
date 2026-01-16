@@ -84,10 +84,8 @@ async function initDatabase() {
             locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
         });
 
-        // TEMPORARY: Load local database for testing (switch back to S3 for production)
-        // const buffer = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz');
-        const response = await fetch('../data/coincidences.db');
-        const buffer = await response.arrayBuffer();
+        // Fetch and decompress the gzipped database from S3
+        const buffer = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz');
         db = new SQL.Database(new Uint8Array(buffer));
 
         resultsDiv.innerHTML = '<div class="no-results">Enter a search term to find coincidences</div>';
@@ -97,7 +95,7 @@ async function initDatabase() {
 
     } catch (error) {
         console.error('Database initialization error:', error);
-        resultsDiv.innerHTML = `<div class="error">Error loading database: ${error.message}<br><br>Make sure data/coincidences.db.gz exists in the project directory.</div>`;
+        resultsDiv.innerHTML = `<div class="error">Error loading database: ${error.message}<br><br>Make sure https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz is accessible and CORS is enabled.</div>`;
         languageFilterDiv.innerHTML = '<em>Database not loaded</em>';
     }
 }
