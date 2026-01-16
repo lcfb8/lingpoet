@@ -305,11 +305,12 @@ function setLanguageMode(mode) {
 
 function switchTab(tab, button) {
     currentTab = tab;
+    console.log('switchTab called, currentTab is now:', currentTab);
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
 
     document.getElementById('searchInput').placeholder =
-        tab === 'spelling' ? 'Type a word to find coincidences...' : 'Type an English word to find pronunciation matches...';
+        tab === 'spelling' ? 'Type a word to find coincidences...' : 'Type an IPA pronunciation (e.g., /pɪn/ or pin)...';
 
     performSearch();
 }
@@ -343,11 +344,13 @@ async function performSearch() {
 
 async function searchDatabase(query) {
     const table = currentTab === 'spelling' ? 'spelling_matches' : 'pronunciation_matches';
-    const searchKey = query.toLowerCase();
+    let searchKey = query.toLowerCase();
 
     if (searchKey.length < 2) return [];
 
     let sql, result;
+    
+    console.log('searchDatabase called with currentTab:', currentTab, 'query:', query);
     
     if (currentTab === 'spelling') {
         // For spelling, search by match_key directly
@@ -358,19 +361,22 @@ async function searchDatabase(query) {
             ORDER BY languages DESC
             LIMIT 100
         `;
+        console.log('Searching spelling_matches with:', searchKey);
         result = db.exec(sql, [`%${searchKey}%`]);
     } else {
-        // For pronunciation, search for English words in entries JSON
-        // then return groups where an English word matches the query
+        // For pronunciation, normalize IPA and search by match_key
+        searchKey = normalizeIpa(query);
+        if (searchKey.length < 2) return [];
+        
         sql = `
             SELECT match_key, languages, gloss_overlap, entries
             FROM pronunciation_matches
-            WHERE entries LIKE ?
+            WHERE match_key LIKE ?
             ORDER BY languages DESC
-            LIMIT 500
+            LIMIT 100
         `;
-        // Search for the word in the entries JSON (will filter more precisely in JS)
-        result = db.exec(sql, [`%"word":"${searchKey}"%`]);
+        console.log('Searching pronunciation_matches with normalized IPA:', searchKey);
+        result = db.exec(sql, [`%${searchKey}%`]);
     }
 
     if (result.length === 0) return [];
@@ -393,14 +399,6 @@ async function searchDatabase(query) {
     for (const row of rows) {
         try {
             let entries = JSON.parse(row[3]);
-            
-            // For pronunciation search, verify there's an English word matching the query
-            if (currentTab === 'pronunciation') {
-                const hasEnglishMatch = entries.some(e => 
-                    e.lang === 'English' && e.word && e.word.toLowerCase() === searchKey
-                );
-                if (!hasEnglishMatch) continue;
-            }
 
             // Filter by selected languages if any
             if (selectedLanguages.length > 0) {
@@ -445,6 +443,7 @@ function renderResults(results) {
     container.innerHTML = results.map(result => {
         const entries = result.entries.map(e => `
             <div class="entry">
+                <div class="entry-word">${escapeHtml(e.word)}</div>
                 <div class="entry-header">
                     <span class="entry-lang">${escapeHtml(e.lang)} (${escapeHtml(e.lang_code || '?')})</span>
                     ${e.ipa ? `<span class="entry-ipa">${escapeHtml(e.ipa)}</span>` : ''}

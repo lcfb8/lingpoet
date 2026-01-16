@@ -857,6 +857,14 @@ input[type="text"]::placeholder {
   margin-top: 0.65rem;
 }
 
+.entry-word {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  font-family: var(--serif);
+}
+
 .entry-header {
   display: flex;
   justify-content: space-between;
