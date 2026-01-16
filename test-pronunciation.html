@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Pronunciation Search</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+    <h1>Pronunciation Search Test</h1>
+    <input type="text" id="query" placeholder="Enter pronunciation or word" value="shark">
+    <button onclick="testSearch()">Search</button>
+    <div id="results"></div>
+
+    <script>
+        let db = null;
+
+        const IPA_MAP = {
+            "ɡ": "g", "θ": "th", "ð": "th", "ʃ": "sh", "ʒ": "zh",
+            "ŋ": "ng", "ɲ": "ny", "ʧ": "ch", "ʤ": "j",
+            "ɑ": "a", "ɒ": "a", "æ": "a", "ʌ": "a",
+            "ɔ": "o", "ɜ": "e", "ə": "e", "ɪ": "i", "ʊ": "u",
+            "ɹ": "r", "ɾ": "r", "ʁ": "r", "ʀ": "r",
+        };
+
+        const IPA_STRIP = /[\[\]/ˈˌ\s]/g;
+
+        function normalizeIpa(ipa) {
+            if (!ipa) return "";
+            ipa = ipa.toLowerCase();
+            for (const [src, dest] of Object.entries(IPA_MAP)) {
+                ipa = ipa.replace(new RegExp(src, 'g'), dest);
+            }
+            ipa = ipa.replace(IPA_STRIP, "");
+            ipa = ipa.replace(/ː/g, "");
+            return ipa;
+        }
+
+        async function initDb() {
+            const SQL = await initSqlJs({
+                locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+            });
+            const response = await fetch('data/coincidences.db');
+            const buffer = await response.arrayBuffer();
+            db = new SQL.Database(new Uint8Array(buffer));
+            console.log("Database loaded");
+        }
+
+        async function testSearch() {
+            if (!db) {
+                console.log("DB not initialized, initializing...");
+                await initDb();
+            }
+
+            const query = document.getElementById('query').value.trim();
+            const normalized = normalizeIpa(query);
+            
+            console.log(`Query: "${query}"`);
+            console.log(`Normalized: "${normalized}"`);
+
+            // Search pronunciation_matches
+            const result = db.exec(`
+                SELECT match_key, languages, entries
+                FROM pronunciation_matches
+                WHERE match_key LIKE ?
+                ORDER BY languages DESC
+                LIMIT 10
+            `, [`%${normalized}%`]);
+
+            let html = `<h2>Search Results for "${query}" (normalized: "${normalized}")</h2>`;
+            
+            if (result.length === 0) {
+                html += '<p>No results found</p>';
+            } else {
+                const rows = result[0].values;
+                html += `<p>Found ${rows.length} matches</p>`;
+                
+                for (const row of rows) {
+                    const matchKey = row[0];
+                    const languages = row[1];
+                    const entries = JSON.parse(row[2]);
+                    
+                    html += `<div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                        <strong>Match Key: ${matchKey}</strong> (${languages} languages)
+                        <ul>`;
+                    
+                    for (const entry of entries) {
+                        html += `<li>${entry.word} (${entry.lang}) - IPA: ${entry.ipa}</li>`;
+                    }
+                    
+                    html += `</ul></div>`;
+                }
+            }
+
+            document.getElementById('results').innerHTML = html;
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initDb);
+    </script>
+</body>
+</html>
