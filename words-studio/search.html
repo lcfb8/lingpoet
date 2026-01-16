@@ -37,6 +37,14 @@
                 <p>Find words that coincidentally match across languages</p>
             </div>
 
+            <!-- Mode Tabs -->
+            <div class="mode-tabs">
+                <button class="mode-tab active" onclick="switchMode('search', this)">🔍 Search Words</button>
+                <button class="mode-tab" onclick="switchMode('explore', this)">🌐 Explore Languages</button>
+            </div>
+
+            <!-- Search Mode -->
+            <div id="searchMode">
             <div class="search-section">
                 <div class="search-tabs">
                     <button class="tab-button active" onclick="switchTab('spelling', this)">Search by Spelling</button>
@@ -82,6 +90,42 @@
 
             <div class="results-section">
                 <div id="results"></div>
+            </div>
+            </div>
+
+            <!-- Explore Mode -->
+            <div id="exploreMode" style="display: none;">
+                <div class="search-section">
+                    <h3 style="margin-bottom: 0.5rem;">Select Languages to Compare</h3>
+                    <p class="muted" style="margin-bottom: 1rem;">Choose 2 or more languages to see all word coincidences between them</p>
+                    
+                    <div class="lang-mode-buttons" style="margin-bottom: 1rem;">
+                        <button id="exploreLangMode-top120" class="lang-mode-btn active" onclick="setExploreLangMode('top120')">Top 120</button>
+                        <button id="exploreLangMode-top500" class="lang-mode-btn" onclick="setExploreLangMode('top500')">Top 500</button>
+                        <button id="exploreLangMode-all" class="lang-mode-btn" onclick="setExploreLangMode('all')">All languages</button>
+                    </div>
+                    
+                    <div class="explore-language-selector">
+                        <input type="text" id="exploreLanguageSearch" placeholder="Search languages..." oninput="renderExploreLanguageList()" style="margin-bottom: 0.5rem;">
+                        <div class="explore-language-list" id="exploreLanguageList"></div>
+                    </div>
+                    
+                    <div class="explore-selected" style="margin-top: 1rem;">
+                        <strong>Selected Languages:</strong>
+                        <div class="explore-selected-tags" id="exploreSelectedTags">
+                            <span class="muted">Select at least 2 languages</span>
+                        </div>
+                    </div>
+                    
+                    <div class="explore-actions" style="margin-top: 1rem; display: flex; gap: 0.75rem;">
+                        <button class="dropdown-clear" onclick="clearExploreLanguages()">Clear All</button>
+                        <button class="dropdown-apply" onclick="findCoincidences()">🔍 Find Coincidences</button>
+                    </div>
+                </div>
+                
+                <div class="results-section">
+                    <div id="exploreResults"></div>
+                </div>
             </div>
         </div>
     </main>
