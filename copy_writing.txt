@@ -8,9 +8,9 @@ The linguistic data comes from <a href="https://www.kaikki.org>kaikki.org</a> (k
 
 The word search was created by downloading kaikki's extract of all Wiktionary data and sorting through it (with AI help) to extract the words that match in spelling and pronunciation across languages. We filtered for words with divergent meanings to exclude instances where the match was due to a shared etymological root or a loan word. Our code can be found on <a href="www.github.com/lcfb8/lingpoet">GitHub</a>.
 
-We aim to create a way to experience interesting, creative information that provides artistic and intellectual value, not necessarily functional or financial value. We were inspired in part by Tyler Vigen's <a href="https://www.tylervigen.com/spurious-correlations">Spurious Correlations</a>. 
+<!-----We aim to create a way to experience interesting, creative information that provides artistic and intellectual value, not necessarily functional or financial value. We were inspired in part by Tyler Vigen's <a href="https://www.tylervigen.com/spurious-correlations">Spurious Correlations</a>. 
 
 The design and mood of the website were inspired in part by <a href="https://www.rupikaur.com>rupikaur.com</a> and <a href="https://www.readpoetry.com/blog/">readpoetry.com</a>.
 
-We are inspired by poets who use multiple languages in their work, such as those in Electric Literature's list of "<a href="https://electricliterature.com/10-daring-bilingual-poetry-collections/">10 Daring Bilingual Poetry Collections</a>."
+We are inspired by poets who use multiple languages in their work, such as those in Electric Literature's list of "<a href="https://electricliterature.com/10-daring-bilingual-poetry-collections/">10 Daring Bilingual Poetry Collections</a>."---->
 

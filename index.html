@@ -69,45 +69,38 @@
             <h2 id="btw-title">Behind the Words</h2>
             <p class="btw__lede">
             Not a dictionary. Not a genealogy of language.
-            We collect coincidences: words that look alike without borrowing, shared roots, or historical handshakes.
-            Here’s where the data comes from, how we gather it, and how we keep it clean enough to play with.
+            We collect coincidences: words that look alike without borrowing, shared roots, or historical handshakes.<br>
+            This website is an amalgamation of effort, curiosity, admiration, and work. 
             </p>
           </header>
 
         <div class="btw__grid">
-          <article class="card">
-            <h3 class="card__title">Sources</h3>
-            <p class="card__text">
-            A small map of where our word forms and metadata come from — public, cited, and versioned.
+
+          <article class="card card--wide">
+            <h3 class="card__title">The Living Archives</h3>
+            <p class="card__text"> The linguistic data comes from <a href="https://www.kaikki.org">kaikki.org</a> (kaikki — [Finnish] all, everything, everyone), a digital archive and data mining group who have extracted millions of words, and the information about those words, from Wiktionary.<br><br><a href="www.wiktionary.org">Wiktionary</a> is a free, collaborative, multilingual online dictionary which aims to describe all words of all languages using definitions and descriptions in English. Wiktionary is written by volunteer editors and hosted by the <a href="https://en.wikipedia.org/wiki/Wikimedia_Foundation">Wikimedia Foundation</a>. 
             </p>
           </article>
 
           <article class="card">
-            <h3 class="card__title">Retrieval</h3>
+            <h3 class="card__title">Linguistic Maneuvering</h3>
             <p class="card__text">
-            How we collect, normalize, and deduplicate entries before they enter the studio.
-            </p>
-          </article>
-
-          <article class="card">
-            <h3 class="card__title">Storage</h3>
-            <p class="card__text">
-            How we store the dataset so it’s fast to explore, transparent to audit, and easy to update.
+            The searchable database was created by downloading kaikki's extract of all Wiktionary data and sorting through it (with AI help) to extract the words that match in spelling and pronunciation across languages. Our code can be found on <a href="www.github.com/lcfb8/lingpoet">GitHub</a>.
             </p>
           </article>
 
           <article class="card card--wide">
-            <h3 class="card__title">Assumptions & caveats</h3>
+            <h3 class="card__title">Assumptions & Caveats</h3>
             <p class="card__text">
-            What we exclude (loanwords, shared roots), what “coincidence” means for us, and the edge cases we keep an eye on.
+            We filtered for words with divergent meanings to exclude instances where the match was due to a shared etymological root or a loan word. We recognize that English is the dominant language of Wiktionary, and there are many words and languages out there that we are missing — particularly those written in scripts other than the Latin alphabet.
             </p>
           </article>
         </div>
 
         <div class="btw__cta">
           <div class="btw__cta-text">
-            <h3>Dare to Play?</h3>
-            <p>Dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy.</p>
+            <h3>Come & Play</h3>
+            <p>Explore coincidences. Make unexpected connections. Find something funny. Write your own poetry. </p>
           </div>
         <a class="btw__button" href="behind-the-words/index.html">Open Words Studio →</a>
         </div>
