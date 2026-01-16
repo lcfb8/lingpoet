@@ -1,11 +1,18 @@
 let db = null;
 let currentTab = 'spelling';
+let currentMode = 'search';  // 'search' or 'explore'
 let searchTimeout;
 let selectedLanguages = [];
 let pendingLanguages = [];  // Languages selected in dropdown but not yet applied
 let languageMode = 'top120';  // 'top120', 'top500', or 'all'
 let allLanguagesData = [];  // { lang, count } sorted by count desc
 let dropdownOpen = false;
+
+// Explore mode state
+let exploreSelectedLanguages = [];
+let exploreLangMode = 'top120';
+let currentExploreResults = [];  // Store results for CSV download
+
 const TOP_120_COUNT = 120;
 const TOP_500_COUNT = 500;
 
@@ -415,10 +422,328 @@ function renderResults(results) {
     }).join('');
 }
 
+// ==================== MODE SWITCHING ====================
+
+function switchMode(mode, button) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    button.classList.add('active');
+    
+    document.getElementById('searchMode').style.display = mode === 'search' ? 'block' : 'none';
+    document.getElementById('exploreMode').style.display = mode === 'explore' ? 'block' : 'none';
+    
+    if (mode === 'explore' && allLanguagesData.length > 0) {
+        renderExploreLanguageList();
+    }
+}
+
+// ==================== EXPLORE MODE FUNCTIONS ====================
+
+function setExploreLangMode(mode) {
+    exploreLangMode = mode;
+    document.querySelectorAll('#exploreMode .lang-mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`exploreLangMode-${mode}`).classList.add('active');
+    renderExploreLanguageList();
+}
+
+function renderExploreLanguageList() {
+    const container = document.getElementById('exploreLanguageList');
+    const searchTerm = document.getElementById('exploreLanguageSearch').value.toLowerCase();
+    
+    let langsToShow;
+    if (exploreLangMode === 'all') {
+        langsToShow = allLanguagesData;
+    } else if (exploreLangMode === 'top500') {
+        langsToShow = allLanguagesData.slice(0, TOP_500_COUNT);
+    } else {
+        langsToShow = allLanguagesData.slice(0, TOP_120_COUNT);
+    }
+    
+    // Sort alphabetically
+    langsToShow = [...langsToShow].sort((a, b) => a.lang.localeCompare(b.lang));
+    
+    // Filter by search term
+    if (searchTerm) {
+        langsToShow = langsToShow.filter(l => l.lang.toLowerCase().includes(searchTerm));
+    }
+    
+    if (langsToShow.length === 0) {
+        container.innerHTML = '<div class="no-results" style="padding: 1rem;">No languages match your search</div>';
+        return;
+    }
+    
+    container.innerHTML = langsToShow.map(({ lang, count }) => `
+        <label class="explore-lang-item ${exploreSelectedLanguages.includes(lang) ? 'selected' : ''}">
+            <input type="checkbox" 
+                   ${exploreSelectedLanguages.includes(lang) ? 'checked' : ''}
+                   onchange="toggleExploreLanguage('${escapeHtml(lang).replace(/'/g, "\\'")}')">
+            <span class="lang-name">${escapeHtml(lang)}</span>
+            <span class="lang-count">${count.toLocaleString()}</span>
+        </label>
+    `).join('');
+}
+
+function toggleExploreLanguage(lang) {
+    const idx = exploreSelectedLanguages.indexOf(lang);
+    if (idx === -1) {
+        exploreSelectedLanguages.push(lang);
+    } else {
+        exploreSelectedLanguages.splice(idx, 1);
+    }
+    renderExploreLanguageList();
+    renderExploreSelectedTags();
+}
+
+function renderExploreSelectedTags() {
+    const container = document.getElementById('exploreSelectedTags');
+    if (exploreSelectedLanguages.length === 0) {
+        container.innerHTML = '<span class="muted">Select at least 2 languages</span>';
+        return;
+    }
+    
+    container.innerHTML = exploreSelectedLanguages.map(lang => `
+        <span class="language-tag">
+            ${escapeHtml(lang)}
+            <span class="remove-tag" onclick="toggleExploreLanguage('${escapeHtml(lang).replace(/'/g, "\\'")}')">×</span>
+        </span>
+    `).join('');
+}
+
+function clearExploreLanguages() {
+    exploreSelectedLanguages = [];
+    renderExploreLanguageList();
+    renderExploreSelectedTags();
+    document.getElementById('exploreResults').innerHTML = '';
+}
+
+async function findCoincidences() {
+    if (exploreSelectedLanguages.length < 2) {
+        alert('Please select at least 2 languages to find coincidences');
+        return;
+    }
+    
+    const resultsContainer = document.getElementById('exploreResults');
+    resultsContainer.innerHTML = '<div class="loading">Finding coincidences... This may take a moment.</div>';
+    
+    // Use setTimeout to allow UI to update before heavy processing
+    setTimeout(async () => {
+        try {
+            const results = [];
+            const selectedSet = new Set(exploreSelectedLanguages);
+            
+            // Search spelling matches
+            const spellingResult = db.exec("SELECT match_key, entries FROM spelling_matches");
+            if (spellingResult.length > 0) {
+                for (const row of spellingResult[0].values) {
+                    const [matchKey, entriesJson] = row;
+                    try {
+                        const entries = JSON.parse(entriesJson);
+                        const matchingEntries = entries.filter(e => selectedSet.has(e.lang));
+                        
+                        if (matchingEntries.length >= 2) {
+                            // Check if we have entries from at least 2 different selected languages
+                            const uniqueLangs = new Set(matchingEntries.map(e => e.lang));
+                            if (uniqueLangs.size >= 2) {
+                                results.push({
+                                    word: matchKey,
+                                    type: 'spelling',
+                                    entries: matchingEntries
+                                });
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+            
+            // Search pronunciation matches
+            const pronResult = db.exec("SELECT match_key, entries FROM pronunciation_matches");
+            if (pronResult.length > 0) {
+                for (const row of pronResult[0].values) {
+                    const [matchKey, entriesJson] = row;
+                    try {
+                        const entries = JSON.parse(entriesJson);
+                        const matchingEntries = entries.filter(e => selectedSet.has(e.lang));
+                        
+                        if (matchingEntries.length >= 2) {
+                            const uniqueLangs = new Set(matchingEntries.map(e => e.lang));
+                            if (uniqueLangs.size >= 2) {
+                                // Check if this is also a spelling match (mark as 'both')
+                                const existingIdx = results.findIndex(r => 
+                                    r.type === 'spelling' && 
+                                    r.entries.some(re => 
+                                        matchingEntries.some(me => 
+                                            re.lang === me.lang && re.word === me.word
+                                        )
+                                    )
+                                );
+                                
+                                if (existingIdx >= 0) {
+                                    results[existingIdx].type = 'both';
+                                    results[existingIdx].ipa = matchKey;
+                                } else {
+                                    results.push({
+                                        ipa: matchKey,
+                                        type: 'pronunciation',
+                                        entries: matchingEntries
+                                    });
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+            
+            // Sort by number of matching languages desc, then alphabetically
+            results.sort((a, b) => {
+                const aLangs = new Set(a.entries.map(e => e.lang)).size;
+                const bLangs = new Set(b.entries.map(e => e.lang)).size;
+                if (bLangs !== aLangs) return bLangs - aLangs;
+                const aKey = a.word || a.ipa || '';
+                const bKey = b.word || b.ipa || '';
+                return aKey.localeCompare(bKey);
+            });
+            
+            renderExploreResults(results);
+            
+        } catch (error) {
+            console.error('Error finding coincidences:', error);
+            resultsContainer.innerHTML = '<div class="error">Error finding coincidences. Please try again.</div>';
+        }
+    }, 50);
+}
+
+function renderExploreResults(results) {
+    const container = document.getElementById('exploreResults');
+    
+    // Store results globally for CSV download
+    currentExploreResults = results;
+    
+    if (results.length === 0) {
+        container.innerHTML = '<div class="no-results">No coincidences found for the selected languages</div>';
+        return;
+    }
+    
+    const langList = exploreSelectedLanguages.join(', ');
+    const summary = `<div class="explore-summary" style="padding: 1rem; background: rgba(47, 92, 255, 0.08); border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <span>Found <strong>${results.length.toLocaleString()}</strong> coincidences between ${langList}</span>
+        <button class="dropdown-apply" onclick="downloadExploreCSV()" style="margin: 0;">📥 Download CSV</button>
+    </div>`;
+    
+    const resultsHtml = results.slice(0, 500).map(result => {
+        const matchTypeClass = result.type === 'both' ? 'match-both' 
+                             : result.type === 'spelling' ? 'match-spelling' 
+                             : 'match-pronunciation';
+        const matchTypeLabel = result.type === 'both' ? '✨ Spelling & Pronunciation' 
+                             : result.type === 'spelling' ? '📝 Spelling Match' 
+                             : '🔊 Pronunciation Match';
+        
+        const header = result.word 
+            ? `<span class="result-word">${escapeHtml(result.word)}</span>`
+            : `<span class="result-word" style="font-style: italic;">/${escapeHtml(result.ipa)}/</span>`;
+        
+        const ipaDisplay = result.type === 'both' && result.ipa 
+            ? `<span class="muted" style="margin-left: 0.5rem;">/${escapeHtml(result.ipa)}/</span>` 
+            : '';
+        
+        const entriesHtml = result.entries.map(entry => `
+            <div class="entry">
+                <div class="entry-header">
+                    <span class="entry-lang">${escapeHtml(entry.lang)} (${escapeHtml(entry.lang_code || '?')})</span>
+                    ${entry.ipa ? `<span class="entry-ipa">${escapeHtml(entry.ipa)}</span>` : ''}
+                </div>
+                <div class="entry-word" style="font-family: var(--serif); font-size: 1.1rem; margin-bottom: 0.25rem;">${escapeHtml(entry.word || result.word || '')}</div>
+                <div class="entry-gloss">${escapeHtml(entry.glosses) || '<em>No definition</em>'}</div>
+            </div>
+        `).join('');
+        
+        return `
+            <div class="result-item">
+                <div class="result-header">
+                    <div>
+                        ${header}
+                        ${ipaDisplay}
+                    </div>
+                    <span class="match-type ${matchTypeClass}">${matchTypeLabel}</span>
+                </div>
+                ${entriesHtml}
+            </div>
+        `;
+    }).join('');
+    
+    const moreNote = results.length > 500 
+        ? `<div class="muted" style="text-align: center; padding: 1rem;">Showing first 500 of ${results.length.toLocaleString()} results</div>` 
+        : '';
+    
+    container.innerHTML = summary + resultsHtml + moreNote;
+}
+
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function downloadExploreCSV() {
+    if (!currentExploreResults || currentExploreResults.length === 0) {
+        alert('No results to download');
+        return;
+    }
+    
+    // CSV header
+    const headers = ['Match Key', 'Match Type', 'Language', 'Language Code', 'Word', 'Pronunciation', 'Definition'];
+    
+    // Build rows - one row per entry (so each language gets its own row)
+    const rows = [];
+    for (const result of currentExploreResults) {
+        const matchKey = result.word || result.ipa || '';
+        const matchType = result.type === 'both' ? 'Spelling & Pronunciation' 
+                        : result.type === 'spelling' ? 'Spelling' 
+                        : 'Pronunciation';
+        
+        for (const entry of result.entries) {
+            rows.push([
+                matchKey,
+                matchType,
+                entry.lang || '',
+                entry.lang_code || '',
+                entry.word || result.word || '',
+                entry.ipa || '',
+                entry.glosses || ''
+            ]);
+        }
+    }
+    
+    // Escape CSV values (handle quotes and commas)
+    function escapeCSV(value) {
+        if (value == null) return '';
+        const str = String(value);
+        if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+    }
+    
+    // Build CSV content
+    const csvContent = [
+        headers.map(escapeCSV).join(','),
+        ...rows.map(row => row.map(escapeCSV).join(','))
+    ].join('\n');
+    
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    
+    // Generate filename with selected languages
+    const langPart = exploreSelectedLanguages.slice(0, 3).join('-').replace(/\s+/g, '_');
+    const suffix = exploreSelectedLanguages.length > 3 ? '-and-more' : '';
+    link.setAttribute('download', `coincidences-${langPart}${suffix}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 // Initialize when page loads

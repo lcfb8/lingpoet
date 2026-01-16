@@ -901,6 +901,124 @@ input[type="text"]::placeholder {
 }
 
 /* ========================================
+   10b. Words Studio - Mode Tabs & Explore
+   ======================================== */
+
+.mode-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.mode-tab {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  cursor: pointer;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-family: var(--sans);
+  color: var(--ink);
+  transition: all 0.2s ease;
+}
+
+.mode-tab:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.mode-tab.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* Explore Language Selector */
+.explore-language-selector {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.explore-language-list {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: white;
+}
+
+.explore-lang-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--rule);
+}
+
+.explore-lang-item:last-child {
+  border-bottom: none;
+}
+
+.explore-lang-item:hover {
+  background: var(--accent-soft);
+}
+
+.explore-lang-item.selected {
+  background: var(--accent-hover);
+}
+
+.explore-lang-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--ink);
+}
+
+.explore-lang-item .lang-name {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.explore-lang-item .lang-count {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.explore-selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Match type badges */
+.match-type {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.match-spelling {
+  background: rgba(47, 92, 255, 0.1);
+  color: var(--accent);
+}
+
+.match-pronunciation {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+
+.match-both {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+/* ========================================
    11. Wander Page Styles
    ======================================== */
 
