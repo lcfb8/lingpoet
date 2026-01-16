@@ -176,33 +176,52 @@ def process_pronunciation(source_conn, target_conn):
         "SELECT ipa, word, lang, lang_code, glosses FROM words WHERE ipa IS NOT NULL AND ipa != '' ORDER BY ipa"
     )
     target_cursor = target_conn.cursor()
-    current_key = None
-    bucket = []
-    saved = 0
+    
+    # Collect all entries by normalized IPA
+    ipa_groups = {}
     rows = 0
+    
     for row in cursor:
-        ipa = row[0]
-        norm = normalize_ipa(ipa)
-        if len(norm) < 2:
-            continue
-        entry = {
-            "norm": norm,
-            "word": row[1],
-            "lang": row[2],
-            "lang_code": row[3],
-            "ipa": ipa,
-            "glosses": row[4] or "",
-        }
-        if norm != current_key and current_key is not None:
-            saved += handle_pronunciation_group(current_key, bucket, target_cursor)
-            bucket = []
-        bucket.append(entry)
-        current_key = norm
+        ipa_field = row[0]
+        word = row[1]
+        lang = row[2]
+        lang_code = row[3]
+        glosses = row[4] or ""
+        
+        # Split multiple IPAs (English words may have "GA, RP" format)
+        ipas = [ipa.strip() for ipa in ipa_field.split(",")]
+        
+        for ipa in ipas:
+            if not ipa:
+                continue
+            norm = normalize_ipa(ipa)
+            if len(norm) < 2:
+                continue
+            
+            entry = {
+                "norm": norm,
+                "word": word,
+                "lang": lang,
+                "lang_code": lang_code,
+                "ipa": ipa,  # Store the specific IPA variant
+                "glosses": glosses,
+            }
+            
+            if norm not in ipa_groups:
+                ipa_groups[norm] = []
+            ipa_groups[norm].append(entry)
+        
         rows += 1
         if rows % 500000 == 0:
-            print(f"[ipa] scanned {rows:,} rows, saved {saved:,} groups")
-    if bucket:
-        saved += handle_pronunciation_group(current_key, bucket, target_cursor)
+            print(f"[ipa] scanned {rows:,} rows...")
+    
+    print(f"[ipa] scanned {rows:,} rows, found {len(ipa_groups):,} unique normalized IPAs")
+    
+    # Process each group
+    saved = 0
+    for norm_key, entries in ipa_groups.items():
+        saved += handle_pronunciation_group(norm_key, entries, target_cursor)
+    
     target_conn.commit()
     print(f"[ipa] complete: {saved:,} coincidence sets")
 
