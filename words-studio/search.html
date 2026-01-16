@@ -48,7 +48,7 @@
             <div class="search-section">
                 <div class="search-tabs">
                     <button class="tab-button active" onclick="switchTab('spelling', this)">Search by Spelling</button>
-                    <button class="tab-button" onclick="switchTab('ipa', this)">Search by IPA Pronunciation (beta)</button>
+                    <button class="tab-button" onclick="switchTab('ipa', this)">Search by Pronunciation (beta)</button>
                 </div>
 
                 <input type="text" id="searchInput" placeholder="Type a word to find coincidences..." onkeyup="debounceSearch()">
@@ -59,7 +59,7 @@
                         <div class="lang-mode-buttons">
                             <button id="langMode-top120" class="lang-mode-btn active" onclick="setLanguageMode('top120')">Top 120</button>
                             <button id="langMode-top500" class="lang-mode-btn" onclick="setLanguageMode('top500')">Top 500</button>
-                            <button id="langMode-all" class="lang-mode-btn" onclick="setLanguageMode('all')">All 2446 languages</button>
+                            <button id="langMode-all" class="lang-mode-btn" onclick="setLanguageMode('all')">All languages</button>
                         </div>
                     </div>
                     

@@ -22,6 +22,7 @@ const IPA_MAP = {
     "ŋ": "ng", "ɲ": "ny", "ʧ": "ch", "ʤ": "j",
     "ɑ": "a", "ɒ": "a", "æ": "a", "ʌ": "a",
     "ɔ": "o", "ɜ": "e", "ə": "e", "ɪ": "i", "ʊ": "u",
+    "ɹ": "r", "ɾ": "r", "ʁ": "r", "ʀ": "r",  // Various r sounds
 };
 
 const IPA_STRIP = /[\[\]/ˈˌ\s]/g;
@@ -83,8 +84,10 @@ async function initDatabase() {
             locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
         });
 
-        // Load the gzip-compressed database file from S3 and decompress in browser
-        const buffer = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/coincidences.db.gz');
+        // TEMPORARY: Load local database for testing (switch back to S3 for production)
+        // const buffer = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz');
+        const response = await fetch('../data/coincidences.db');
+        const buffer = await response.arrayBuffer();
         db = new SQL.Database(new Uint8Array(buffer));
 
         resultsDiv.innerHTML = '<div class="no-results">Enter a search term to find coincidences</div>';
@@ -306,7 +309,7 @@ function switchTab(tab, button) {
     button.classList.add('active');
 
     document.getElementById('searchInput').placeholder =
-        tab === 'spelling' ? 'Type a word to find coincidences...' : 'Type IPA pronunciation...';
+        tab === 'spelling' ? 'Type a word to find coincidences...' : 'Type an English word to find pronunciation matches...';
 
     performSearch();
 }
@@ -340,19 +343,35 @@ async function performSearch() {
 
 async function searchDatabase(query) {
     const table = currentTab === 'spelling' ? 'spelling_matches' : 'pronunciation_matches';
-    const searchKey = currentTab === 'spelling' ? query.toLowerCase() : normalizeIpa(query);
+    const searchKey = query.toLowerCase();
 
     if (searchKey.length < 2) return [];
 
-    const sql = `
-        SELECT match_key, languages, gloss_overlap, entries
-        FROM ${table}
-        WHERE match_key LIKE ?
-        ORDER BY languages DESC
-        LIMIT 100
-    `;
-
-    const result = db.exec(sql, [`%${searchKey}%`]);
+    let sql, result;
+    
+    if (currentTab === 'spelling') {
+        // For spelling, search by match_key directly
+        sql = `
+            SELECT match_key, languages, gloss_overlap, entries
+            FROM ${table}
+            WHERE match_key LIKE ?
+            ORDER BY languages DESC
+            LIMIT 100
+        `;
+        result = db.exec(sql, [`%${searchKey}%`]);
+    } else {
+        // For pronunciation, search for English words in entries JSON
+        // then return groups where an English word matches the query
+        sql = `
+            SELECT match_key, languages, gloss_overlap, entries
+            FROM pronunciation_matches
+            WHERE entries LIKE ?
+            ORDER BY languages DESC
+            LIMIT 500
+        `;
+        // Search for the word in the entries JSON (will filter more precisely in JS)
+        result = db.exec(sql, [`%"word":"${searchKey}"%`]);
+    }
 
     if (result.length === 0) return [];
 
@@ -362,6 +381,14 @@ async function searchDatabase(query) {
     for (const row of rows) {
         try {
             let entries = JSON.parse(row[3]);
+            
+            // For pronunciation search, verify there's an English word matching the query
+            if (currentTab === 'pronunciation') {
+                const hasEnglishMatch = entries.some(e => 
+                    e.lang === 'English' && e.word && e.word.toLowerCase() === searchKey
+                );
+                if (!hasEnglishMatch) continue;
+            }
 
             // Filter by selected languages if any
             if (selectedLanguages.length > 0) {
