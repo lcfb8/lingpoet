@@ -14,6 +14,9 @@ Filtering criteria (to emphasize accidental matches, not loanwords/related roots
 - Remove hyphenated words from spelling-only matches (keep only if they also
   appear in pronunciation matches).
 - Remove words longer than 9 letters (likely to be etymologically related).
+- Per-language gloss cleanup when grouping:
+    * Deduplicate gloss strings.
+    * Drop glosses starting with "Initialism of" (case-insensitive); if all are initialisms, keep only the first.
 
 Notes:
 - This pipeline only uses words.db (no etymology), so it approximates loanword
@@ -239,14 +242,40 @@ def reduce_entries(entries):
                 "tokens": set(),
             }
         if row["glosses"]:
-            combined[lang]["glosses"].append(row["glosses"])
-            combined[lang]["tokens"].update(tokenize_gloss(row["glosses"]))
+            combined[lang]["glosses"].append(row["glosses"].strip())
     reduced = []
     for data in combined.values():
-        gloss_text = " | ".join(g for g in data["glosses"] if g)
+        # Deduplicate glosses and drop empty values
+        raw_glosses = [g for g in data["glosses"] if g]
+        seen_gloss = set()
+        deduped = []
+        for g in raw_glosses:
+            if g in seen_gloss:
+                continue
+            seen_gloss.add(g)
+            deduped.append(g)
+
+        # Remove glosses that start with "Initialism of" (case-insensitive)
+        initialism_filtered = [
+            g for g in deduped if not g.lower().startswith("initialism of")
+        ]
+
+        if initialism_filtered:
+            keep_glosses = initialism_filtered
+        elif deduped:
+            # If all glosses were initialisms, keep the first one
+            keep_glosses = deduped[:1]
+        else:
+            keep_glosses = []
+
+        gloss_text = " | ".join(keep_glosses)
         if not gloss_text.strip():
             continue
         data["glosses"] = gloss_text
+        # Rebuild tokens from the kept glosses
+        data["tokens"] = set()
+        for g in keep_glosses:
+            data["tokens"].update(tokenize_gloss(g))
         reduced.append(data)
     return reduced
 
