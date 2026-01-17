@@ -1,7 +1,7 @@
 /* Wander page interactive functionality */
 
 (async function () {
-  const DB_URL = "https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz";
+  const DB_URL = "../data/coincidences.db";
   const statusEl = document.getElementById("status");
   const goBtn = document.getElementById("go-wander");
   const grid = document.getElementById("peek-grid");
@@ -13,8 +13,13 @@
     setStatus("Fetching database…");
     const resp = await fetch(DB_URL);
     const ab = await resp.arrayBuffer();
-    setStatus("Decompressing…");
-    const u8 = pako.ungzip(new Uint8Array(ab));
+    let u8;
+    if (DB_URL.endsWith('.gz')) {
+      setStatus("Decompressing…");
+      u8 = pako.ungzip(new Uint8Array(ab));
+    } else {
+      u8 = new Uint8Array(ab);
+    }
     setStatus("Loading SQL engine…");
     const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` });
     const db = new SQL.Database(u8);

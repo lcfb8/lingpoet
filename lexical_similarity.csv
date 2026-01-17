@@ -1,0 +1,89 @@
+#romance 
+french, old french
+french, middle french
+old french, middle french
+french, Norman
+Franco-Provençal, french
+Franco-Provençal, occitan
+norman, old french
+norman, middle french
+italian, sardinian
+latin, italian
+latin, spanish
+latin, romanian
+latin, portuguese
+spanish, romanian
+spanish, Portuguese
+spanish, Catalan
+portuguese, Catalan
+
+#germanic
+limburgish, german
+low german, german
+galician, portuguese
+galician, spanish
+galician, Catalan
+mirandese, galician
+mirandese, portuguese
+mirandese, spanish
+occitan, Catalan
+asturian, spanish
+asturian, Catalan
+aragonese, asturian
+aragonese, spanish
+norwegian nynorsk, norwegian Bokmål
+norwegian, norwegian nynorsk
+norwegian, norwegian bokmål
+norwegian nynorsk, Swedish
+norwegian Bokmål, Swedish
+norwegian nynorsk, Danish
+norwegian bokmål, Danish
+swedish, Danish
+
+#austronesian
+indonesian, Javanese
+indonesian, Balinese
+javanese, Balinese
+indonesian, Sundanese
+javanese, Sundanese
+ilocano, Cebuano
+tagalog, cebuano
+Bikol central, Cebuano
+bikol central, ilocano
+bikol central, tagalog
+indonesian, Malay
+malay, javanese
+javanese, old javanese
+indonesian, old javanese
+
+#celtic
+scottish gaelic, Irish
+irish, middle irish
+irish, old irish
+middle irish, old irish
+cornish, welsh
+
+#arabic
+moroccan Arabic, north levantine Arabic
+south levantine Arabic, moroccan arabic
+south levantine Arabic, north levantine Arabic
+Arabic, moroccan arabic
+arabic, south levantine arabic
+arabic, north levantine arabic
+
+#other
+estonian, finnish
+karelian, finnish
+votic, finnish
+zulu, xhosa
+swahili, tumbuka
+russian, Bulgarian
+russian, Ukrainian
+russian, Macedonian
+bulgarian, macedonian
+polish, old polish
+ido, esperanto
+basque, proto-basque
+turkish, Azerbaijani
+
+

@@ -1,3 +1,29 @@
+"""
+Build coincidences.db from words.db.
+
+Filtering criteria (to emphasize accidental matches, not loanwords/related roots):
+- Minimum languages per match: at least 2 distinct languages (MIN_LANGS).
+- Gloss overlap filter: remove groups whose average gloss token overlap >= GLOSS_THRESHOLD.
+- Remove entries with disallowed punctuation (anything except letters, digits, - and ').
+- Remove multi-word entries (any whitespace).
+- Remove entries whose primary gloss contains "alternative form of".
+- Remove non-English entries whose gloss is just the English word within the same group.
+- Remove entries whose language is Translingual.
+- Remove any group containing a language pair listed in lexical_similarity.csv
+  (language names are case-insensitive, parsed from the repo root).
+- Remove hyphenated words from spelling-only matches (keep only if they also
+  appear in pronunciation matches).
+- Remove words longer than 9 letters (likely to be etymologically related).
+- Per-language gloss cleanup when grouping:
+  * Deduplicate gloss strings.
+  * Drop glosses starting with "Initialism of", "Acronym of", or "Abbreviation of" (case-insensitive),
+    but always keep the first gloss.
+  * Limit to maximum 5 glosses per language entry.
+- This pipeline only uses words.db (no etymology), so it approximates loanword
+  filtering by gloss overlap and language-pair exclusions.
+- IPA normalization is applied to group pronunciation matches.
+"""
+
 import json
 import os
 import re
@@ -6,15 +32,119 @@ from itertools import combinations
 
 SOURCE_DB = "data/words.db"
 TARGET_DB = "data/coincidences.db"
+LEXICAL_SIMILARITY_CSV = "lexical_similarity.csv"
 GLOSS_THRESHOLD = 0.35
 MIN_LANGS = 2
 BATCH_LIMIT = 10000
+
+ALLOWED_WORD_CHARS = set("-'")
 
 def tokenize_gloss(text):
     if not text:
         return set()
     tokens = re.findall(r"[a-zA-Z]+", text.lower())
     return {t for t in tokens if len(t) > 2}
+
+def has_disallowed_punctuation(word):
+    if not word:
+        return True
+    for ch in word:
+        if ch.isalnum() or ch in ALLOWED_WORD_CHARS:
+            continue
+        return True
+    return False
+
+def is_multiword(word):
+    if not word:
+        return True
+    return any(ch.isspace() for ch in word)
+
+def has_hyphen(word):
+    if not word:
+        return False
+    return "-" in word
+
+def normalize_language(lang):
+    if not lang:
+        return ""
+    return " ".join(lang.strip().lower().split())
+
+def load_lexical_similarity_pairs():
+    pairs = set()
+    if not os.path.exists(LEXICAL_SIMILARITY_CSV):
+        return pairs
+    with open(LEXICAL_SIMILARITY_CSV, "r", encoding="utf-8") as handle:
+        for line in handle:
+            raw = line.strip()
+            if not raw or raw.startswith("#"):
+                continue
+            parts = [normalize_language(p) for p in raw.split(",") if p.strip()]
+            if len(parts) != 2:
+                continue
+            if not parts[0] or not parts[1]:
+                continue
+            pairs.add(frozenset(parts))
+    return pairs
+
+def has_excluded_language_pair(entries, excluded_pairs):
+    if not excluded_pairs:
+        return False
+    langs = [
+        normalize_language(entry.get("lang"))
+        for entry in entries
+        if entry.get("lang")
+    ]
+    if len(langs) < 2:
+        return False
+    for left, right in combinations(langs, 2):
+        if frozenset((left, right)) in excluded_pairs:
+            return True
+    return False
+
+def normalize_for_comparison(text):
+    if not text:
+        return ""
+    text = re.sub(r"\([^)]*\)", " ", text)
+    return "".join(ch for ch in text.lower() if ch.isalpha())
+
+def is_alternative_form_gloss(entry):
+    glosses = (entry.get("glosses") or "").strip()
+    if not glosses:
+        return False
+    primary = re.split(r"[;|/]", glosses, maxsplit=1)[0].strip().lower()
+    return "alternative form of" in primary
+
+def is_english_self_gloss(entry, english_words_norm):
+    if entry.get("lang") == "English":
+        return False
+    glosses = (entry.get("glosses") or "").strip()
+    if not glosses or not english_words_norm:
+        return False
+    parts = re.split(r"[;|/,]", glosses)
+    for part in parts:
+        if normalize_for_comparison(part) in english_words_norm:
+            return True
+    return False
+
+def filter_entries(entries):
+    filtered = [
+        e for e in entries
+        if not has_disallowed_punctuation(e.get("word", ""))
+        and not is_multiword(e.get("word", ""))
+        and not is_alternative_form_gloss(e)
+        and normalize_language(e.get("lang")) != "translingual"
+        and len(e.get("word", "")) <= 9
+    ]
+    english_words_norm = {
+        normalize_for_comparison(e.get("word", ""))
+        for e in filtered
+        if e.get("lang") == "English"
+    }
+    if english_words_norm:
+        filtered = [
+            e for e in filtered if not is_english_self_gloss(e, english_words_norm)
+        ]
+    return filtered
 
 def gloss_distance(entries):
     overlaps = []
@@ -112,14 +242,49 @@ def reduce_entries(entries):
                 "tokens": set(),
             }
         if row["glosses"]:
-            combined[lang]["glosses"].append(row["glosses"])
-            combined[lang]["tokens"].update(tokenize_gloss(row["glosses"]))
+            # Split glosses by | and add each one
+            glosses_split = [g.strip() for g in row["glosses"].split("|")]
+            combined[lang]["glosses"].extend(glosses_split)
     reduced = []
     for data in combined.values():
-        gloss_text = " | ".join(g for g in data["glosses"] if g)
+        # Deduplicate glosses and drop empty values
+        raw_glosses = [g for g in data["glosses"] if g]
+        seen_gloss = set()
+        deduped = []
+        for g in raw_glosses:
+            if g in seen_gloss:
+                continue
+            seen_gloss.add(g)
+            deduped.append(g)
+
+        # Remove glosses that start with "Initialism of", "Acronym of", or "Abbreviation of" (case-insensitive),
+        # but always keep the first gloss if it's an initialism/acronym/abbreviation
+        keep_glosses = []
+        for i, g in enumerate(deduped):
+            is_abbrev = (
+                g.lower().startswith("initialism of")
+                or g.lower().startswith("acronym of")
+                or g.lower().startswith("abbreviation of")
+            )
+            if i == 0:
+                # Always keep the first gloss, regardless
+                keep_glosses.append(g)
+            elif not is_abbrev:
+                # Keep non-initialism/acronym/abbreviation glosses
+                keep_glosses.append(g)
+            # Skip subsequent initialism/acronym/abbreviation glosses
+
+        # Limit to 5 glosses max per language
+        keep_glosses = keep_glosses[:5]
+
+        gloss_text = " | ".join(keep_glosses)
         if not gloss_text.strip():
             continue
         data["glosses"] = gloss_text
+        # Rebuild tokens from the kept glosses
+        data["tokens"] = set()
+        for g in keep_glosses:
+            data["tokens"].update(tokenize_gloss(g))
         reduced.append(data)
     return reduced
 
@@ -133,7 +298,7 @@ def save_match(cursor, table, key, entries, overlap):
         (key, len(entries), overlap, json.dumps(payload, ensure_ascii=False))
     )
 
-def process_spelling(source_conn, target_conn):
+def process_spelling(source_conn, target_conn, pronunciation_words=None, excluded_pairs=None):
     cursor = source_conn.execute(
         "SELECT word, lang, lang_code, ipa, glosses FROM words WHERE word != '' ORDER BY word"
     )
@@ -144,6 +309,8 @@ def process_spelling(source_conn, target_conn):
     rows = 0
     for row in cursor:
         word = row[0]
+        if has_disallowed_punctuation(word) or is_multiword(word):
+            continue
         entry = {
             "word": word,
             "lang": row[1],
@@ -152,7 +319,13 @@ def process_spelling(source_conn, target_conn):
             "glosses": row[4] or "",
         }
         if word != current_word and current_word is not None:
-            saved += handle_spelling_group(current_word, bucket, target_cursor)
+            saved += handle_spelling_group(
+                current_word,
+                bucket,
+                target_cursor,
+                pronunciation_words=pronunciation_words,
+                excluded_pairs=excluded_pairs,
+            )
             bucket = []
         bucket.append(entry)
         current_word = word
@@ -160,26 +333,39 @@ def process_spelling(source_conn, target_conn):
         if rows % 500000 == 0:
             print(f"[spelling] scanned {rows:,} rows, saved {saved:,} groups")
     if bucket:
-        saved += handle_spelling_group(current_word, bucket, target_cursor)
+        saved += handle_spelling_group(
+            current_word,
+            bucket,
+            target_cursor,
+            pronunciation_words=pronunciation_words,
+            excluded_pairs=excluded_pairs,
+        )
     target_conn.commit()
     print(f"[spelling] complete: {saved:,} coincidence sets")
 
 
-def handle_spelling_group(word, entries, cursor):
+def handle_spelling_group(word, entries, cursor, pronunciation_words=None, excluded_pairs=None):
+    entries = filter_entries(entries)
     reduced = reduce_entries(entries)
     if len(reduced) < MIN_LANGS:
         return 0
+    if has_excluded_language_pair(reduced, excluded_pairs or set()):
+        return 0
+    if has_hyphen(word) and pronunciation_words is not None:
+        if word not in pronunciation_words:
+            return 0
     overlap = gloss_distance(reduced)
     if overlap >= GLOSS_THRESHOLD:
         return 0
     save_match(cursor, "spelling_matches", word, reduced, overlap)
     return 1
 
-def process_pronunciation(source_conn, target_conn):
+def process_pronunciation(source_conn, target_conn, excluded_pairs=None):
     cursor = source_conn.execute(
         "SELECT ipa, word, lang, lang_code, glosses FROM words WHERE ipa IS NOT NULL AND ipa != '' ORDER BY ipa"
     )
     target_cursor = target_conn.cursor()
+    pronunciation_words = set()
     
     # Collect all entries by normalized IPA
     ipa_groups = {}
@@ -188,6 +374,8 @@ def process_pronunciation(source_conn, target_conn):
     for row in cursor:
         ipa_field = row[0]
         word = row[1]
+        if has_disallowed_punctuation(word) or is_multiword(word):
+            continue
         lang = row[2]
         lang_code = row[3]
         glosses = row[4] or ""
@@ -224,20 +412,35 @@ def process_pronunciation(source_conn, target_conn):
     # Process each group
     saved = 0
     for norm_key, entries in ipa_groups.items():
-        saved += handle_pronunciation_group(norm_key, entries, target_cursor)
+        saved += handle_pronunciation_group(
+            norm_key,
+            entries,
+            target_cursor,
+            pronunciation_words=pronunciation_words,
+            excluded_pairs=excluded_pairs,
+        )
     
     target_conn.commit()
     print(f"[ipa] complete: {saved:,} coincidence sets")
+    return pronunciation_words
 
 
-def handle_pronunciation_group(norm_key, entries, cursor):
+def handle_pronunciation_group(norm_key, entries, cursor, pronunciation_words=None, excluded_pairs=None):
+    entries = filter_entries(entries)
     reduced = reduce_entries(entries)
     if len(reduced) < MIN_LANGS:
+        return 0
+    if has_excluded_language_pair(reduced, excluded_pairs or set()):
         return 0
     overlap = gloss_distance(reduced)
     if overlap >= GLOSS_THRESHOLD:
         return 0
     save_match(cursor, "pronunciation_matches", norm_key, reduced, overlap)
+    if pronunciation_words is not None:
+        for entry in reduced:
+            word = entry.get("word")
+            if word:
+                pronunciation_words.add(word)
     return 1
 
 def main():
@@ -245,9 +448,19 @@ def main():
         raise SystemExit(f"Missing source database at {SOURCE_DB}")
     source_conn = sqlite3.connect(SOURCE_DB)
     target_conn = init_target_db()
+    excluded_pairs = load_lexical_similarity_pairs()
     try:
-        process_spelling(source_conn, target_conn)
-        process_pronunciation(source_conn, target_conn)
+        pronunciation_words = process_pronunciation(
+            source_conn,
+            target_conn,
+            excluded_pairs=excluded_pairs,
+        )
+        process_spelling(
+            source_conn,
+            target_conn,
+            pronunciation_words=pronunciation_words,
+            excluded_pairs=excluded_pairs,
+        )
     finally:
         source_conn.close()
         target_conn.close()
