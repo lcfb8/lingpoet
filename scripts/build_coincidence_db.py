@@ -1,3 +1,25 @@
+"""
+Build coincidences.db from words.db.
+
+Filtering criteria (to emphasize accidental matches, not loanwords/related roots):
+- Minimum languages per match: at least 2 distinct languages (MIN_LANGS).
+- Gloss overlap filter: remove groups whose average gloss token overlap >= GLOSS_THRESHOLD.
+- Remove entries with disallowed punctuation (anything except letters, digits, - and ').
+- Remove multi-word entries (any whitespace).
+- Remove entries whose primary gloss contains "alternative form of".
+- Remove non-English entries whose gloss is just the English word within the same group.
+- Remove entries whose language is Translingual.
+- Remove any group containing a language pair listed in lexical_similarity.csv
+    (language names are case-insensitive, parsed from the repo root).
+- Remove hyphenated words from spelling-only matches (keep only if they also
+    appear in pronunciation matches).
+
+Notes:
+- This pipeline only uses words.db (no etymology), so it approximates loanword
+    filtering by gloss overlap and language-pair exclusions.
+- IPA normalization is applied to group pronunciation matches.
+"""
+
 import json
 import os
 import re

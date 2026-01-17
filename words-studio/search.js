@@ -16,6 +16,8 @@ let currentExploreResults = [];  // Store results for CSV download
 const TOP_120_COUNT = 120;
 const TOP_500_COUNT = 500;
 
+const DB_URL = '../data/coincidences.db';
+
 // IPA normalization (same logic as Python version)
 const IPA_MAP = {
     "ɡ": "g", "θ": "th", "ð": "th", "ʃ": "sh", "ʒ": "zh",
@@ -60,6 +62,17 @@ async function fetchGzipArrayBuffer(url) {
     return decompressed.buffer;
 }
 
+async function fetchDatabaseArrayBuffer(url) {
+    if (url.endsWith('.gz')) {
+        return fetchGzipArrayBuffer(url);
+    }
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error('Database file not found. Please check the URL.');
+    }
+    return await response.arrayBuffer();
+}
+
 // Lazy-load pako only if needed for gzip fallback
 function loadPako() {
     return new Promise((resolve, reject) => {
@@ -85,7 +98,7 @@ async function initDatabase() {
         });
 
         // Fetch and load the compressed database
-        const response = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz');
+        const response = await fetchDatabaseArrayBuffer(DB_URL);
         db = new SQL.Database(new Uint8Array(response));
 
         resultsDiv.innerHTML = '<div class="no-results">Enter a search term to find coincidences</div>';
@@ -95,7 +108,7 @@ async function initDatabase() {
 
     } catch (error) {
         console.error('Database initialization error:', error);
-        resultsDiv.innerHTML = `<div class="error">Error loading database: ${error.message}<br><br>Make sure https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz is accessible and CORS is enabled.</div>`;
+        resultsDiv.innerHTML = `<div class="error">Error loading database: ${error.message}</div>`;
         languageFilterDiv.innerHTML = '<em>Database not loaded</em>';
     }
 }
