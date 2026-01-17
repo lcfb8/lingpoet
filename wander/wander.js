@@ -1,7 +1,7 @@
 /* Wander page interactive functionality */
 
 (async function () {
-  const DB_URL = "https://dhrumil-public.s3.amazonaws.com/code4policy/coincidences.db.gz";
+  const DB_URL = "https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz";
   const statusEl = document.getElementById("status");
   const goBtn = document.getElementById("go-wander");
   const grid = document.getElementById("peek-grid");

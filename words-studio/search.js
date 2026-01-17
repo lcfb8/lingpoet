@@ -84,9 +84,9 @@ async function initDatabase() {
             locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
         });
 
-        // Fetch and decompress the gzipped database from S3
-        const buffer = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz');
-        db = new SQL.Database(new Uint8Array(buffer));
+        // Fetch and load the compressed database
+        const response = await fetchGzipArrayBuffer('https://dhrumil-public.s3.amazonaws.com/code4policy/lingpoet/coincidences.db.gz');
+        db = new SQL.Database(new Uint8Array(response));
 
         resultsDiv.innerHTML = '<div class="no-results">Enter a search term to find coincidences</div>';
 
