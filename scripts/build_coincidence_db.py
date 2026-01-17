@@ -15,10 +15,10 @@ Filtering criteria (to emphasize accidental matches, not loanwords/related roots
   appear in pronunciation matches).
 - Remove words longer than 9 letters (likely to be etymologically related).
 - Per-language gloss cleanup when grouping:
-    * Deduplicate gloss strings.
-    * Drop glosses starting with "Initialism of" (case-insensitive); if all are initialisms, keep only the first.
-
-Notes:
+  * Deduplicate gloss strings.
+  * Drop glosses starting with "Initialism of", "Acronym of", or "Abbreviation of" (case-insensitive),
+    but always keep the first gloss.
+  * Limit to maximum 5 glosses per language entry.
 - This pipeline only uses words.db (no etymology), so it approximates loanword
   filtering by gloss overlap and language-pair exclusions.
 - IPA normalization is applied to group pronunciation matches.
@@ -242,7 +242,9 @@ def reduce_entries(entries):
                 "tokens": set(),
             }
         if row["glosses"]:
-            combined[lang]["glosses"].append(row["glosses"].strip())
+            # Split glosses by | and add each one
+            glosses_split = [g.strip() for g in row["glosses"].split("|")]
+            combined[lang]["glosses"].extend(glosses_split)
     reduced = []
     for data in combined.values():
         # Deduplicate glosses and drop empty values
@@ -255,18 +257,25 @@ def reduce_entries(entries):
             seen_gloss.add(g)
             deduped.append(g)
 
-        # Remove glosses that start with "Initialism of" (case-insensitive)
-        initialism_filtered = [
-            g for g in deduped if not g.lower().startswith("initialism of")
-        ]
+        # Remove glosses that start with "Initialism of", "Acronym of", or "Abbreviation of" (case-insensitive),
+        # but always keep the first gloss if it's an initialism/acronym/abbreviation
+        keep_glosses = []
+        for i, g in enumerate(deduped):
+            is_abbrev = (
+                g.lower().startswith("initialism of")
+                or g.lower().startswith("acronym of")
+                or g.lower().startswith("abbreviation of")
+            )
+            if i == 0:
+                # Always keep the first gloss, regardless
+                keep_glosses.append(g)
+            elif not is_abbrev:
+                # Keep non-initialism/acronym/abbreviation glosses
+                keep_glosses.append(g)
+            # Skip subsequent initialism/acronym/abbreviation glosses
 
-        if initialism_filtered:
-            keep_glosses = initialism_filtered
-        elif deduped:
-            # If all glosses were initialisms, keep the first one
-            keep_glosses = deduped[:1]
-        else:
-            keep_glosses = []
+        # Limit to 5 glosses max per language
+        keep_glosses = keep_glosses[:5]
 
         gloss_text = " | ".join(keep_glosses)
         if not gloss_text.strip():

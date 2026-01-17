@@ -3,6 +3,8 @@ french, old french
 french, middle french
 old french, middle french
 french, Norman
+Franco-Provençal, french
+Franco-Provençal, occitan
 norman, old french
 norman, middle french
 italian, sardinian
@@ -51,12 +53,15 @@ bikol central, ilocano
 bikol central, tagalog
 indonesian, Malay
 malay, javanese
+javanese, old javanese
+indonesian, old javanese
 
 #celtic
 scottish gaelic, Irish
 irish, middle irish
 irish, old irish
 middle irish, old irish
+cornish, welsh
 
 #arabic
 moroccan Arabic, north levantine Arabic
@@ -71,7 +76,14 @@ estonian, finnish
 karelian, finnish
 votic, finnish
 zulu, xhosa
+swahili, tumbuka
 russian, Bulgarian
 russian, Ukrainian
+russian, Macedonian
+bulgarian, macedonian
+polish, old polish
+ido, esperanto
+basque, proto-basque
+turkish, Azerbaijani
 
 
