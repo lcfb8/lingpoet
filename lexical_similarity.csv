@@ -9,6 +9,7 @@ italian, sardinian
 latin, italian
 latin, spanish
 latin, romanian
+latin, portuguese
 spanish, romanian
 spanish, Portuguese
 spanish, Catalan
@@ -47,6 +48,7 @@ ilocano, Cebuano
 tagalog, cebuano
 Bikol central, Cebuano
 bikol central, ilocano
+bikol central, tagalog
 indonesian, Malay
 malay, javanese
 
@@ -60,6 +62,13 @@ middle irish, old irish
 moroccan Arabic, north levantine Arabic
 south levantine Arabic, moroccan arabic
 south levantine Arabic, north levantine Arabic
+Arabic, moroccan arabic
+arabic, south levantine arabic
+arabic, north levantine arabic
 
 #other
 estonian, finnish
+karelian, finnish
+votic, finnish
+zulu, xhosa
+

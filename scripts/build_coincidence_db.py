@@ -10,13 +10,14 @@ Filtering criteria (to emphasize accidental matches, not loanwords/related roots
 - Remove non-English entries whose gloss is just the English word within the same group.
 - Remove entries whose language is Translingual.
 - Remove any group containing a language pair listed in lexical_similarity.csv
-    (language names are case-insensitive, parsed from the repo root).
+  (language names are case-insensitive, parsed from the repo root).
 - Remove hyphenated words from spelling-only matches (keep only if they also
-    appear in pronunciation matches).
+  appear in pronunciation matches).
+- Remove words longer than 9 letters (likely to be etymologically related).
 
 Notes:
 - This pipeline only uses words.db (no etymology), so it approximates loanword
-    filtering by gloss overlap and language-pair exclusions.
+  filtering by gloss overlap and language-pair exclusions.
 - IPA normalization is applied to group pronunciation matches.
 """
 
@@ -129,6 +130,7 @@ def filter_entries(entries):
         and not is_multiword(e.get("word", ""))
         and not is_alternative_form_gloss(e)
         and normalize_language(e.get("lang")) != "translingual"
+        and len(e.get("word", "")) <= 9
     ]
     english_words_norm = {
         normalize_for_comparison(e.get("word", ""))
