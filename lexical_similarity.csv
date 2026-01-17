@@ -1,0 +1,65 @@
+#romance 
+french, old french
+french, middle french
+old french, middle french
+french, Norman
+norman, old french
+norman, middle french
+italian, sardinian
+latin, italian
+latin, spanish
+latin, romanian
+spanish, romanian
+spanish, Portuguese
+spanish, Catalan
+portuguese, Catalan
+
+#germanic
+limburgish, german
+low german, german
+galician, portuguese
+galician, spanish
+galician, Catalan
+mirandese, galician
+mirandese, portuguese
+mirandese, spanish
+occitan, Catalan
+asturian, spanish
+asturian, Catalan
+aragonese, asturian
+aragonese, spanish
+norwegian nynorsk, norwegian Bokmål
+norwegian, norwegian nynorsk
+norwegian, norwegian bokmål
+norwegian nynorsk, Swedish
+norwegian Bokmål, Swedish
+norwegian nynorsk, Danish
+norwegian bokmål, Danish
+swedish, Danish
+
+#austronesian
+indonesian, Javanese
+indonesian, Balinese
+javanese, Balinese
+indonesian, Sundanese
+javanese, Sundanese
+ilocano, Cebuano
+tagalog, cebuano
+Bikol central, Cebuano
+bikol central, ilocano
+indonesian, Malay
+malay, javanese
+
+#celtic
+scottish gaelic, Irish
+irish, middle irish
+irish, old irish
+middle irish, old irish
+
+#arabic
+moroccan Arabic, north levantine Arabic
+south levantine Arabic, moroccan arabic
+south levantine Arabic, north levantine Arabic
+
+#other
+estonian, finnish
