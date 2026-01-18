@@ -11,6 +11,10 @@ Filtering criteria (to emphasize accidental matches, not loanwords/related roots
 - Remove entries whose language is Translingual.
 - Remove any group containing a language pair listed in lexical_similarity.csv
   (language names are case-insensitive, parsed from the repo root).
+  -This filter is currently disabled as it was too aggressive, removing all matches 
+   for groups with ANY excluded language pair, even when other languages had 
+   completely different meanings. A refined approach is needed to remove only 
+   specific language pairs instead of entire groups. To be continued. 
 - Remove hyphenated words from spelling-only matches (keep only if they also
   appear in pronunciation matches).
 - Remove Latin-script words longer than 9 letters (likely to be etymologically related).
