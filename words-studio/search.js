@@ -4,17 +4,16 @@ let currentMode = 'search';  // 'search' or 'explore'
 let searchTimeout;
 let selectedLanguages = [];
 let pendingLanguages = [];  // Languages selected in dropdown but not yet applied
-let languageMode = 'top120';  // 'top120', 'top500', or 'all'
+let languageMode = 'top300';  // 'top300' or 'all'
 let allLanguagesData = [];  // { lang, count } sorted by count desc
 let dropdownOpen = false;
 
 // Explore mode state
 let exploreSelectedLanguages = [];
-let exploreLangMode = 'top120';
+let exploreLangMode = 'top300';
 let currentExploreResults = [];  // Store results for CSV download
 
-const TOP_120_COUNT = 120;
-const TOP_500_COUNT = 500;
+const TOP_300_COUNT = 300;
 
 const DB_URL = '../data/coincidences.db';
 
@@ -160,10 +159,8 @@ function renderLanguageDropdown(filter = '') {
     
     if (languageMode === 'all') {
         langsToShow = allLanguagesData;
-    } else if (languageMode === 'top500') {
-        langsToShow = allLanguagesData.slice(0, TOP_500_COUNT);
     } else {
-        langsToShow = allLanguagesData.slice(0, TOP_120_COUNT);
+        langsToShow = allLanguagesData.slice(0, TOP_300_COUNT);
     }
     
     // Sort displayed languages alphabetically
@@ -189,7 +186,7 @@ function renderLanguageDropdown(filter = '') {
                    ${pendingLanguages.includes(lang) ? 'checked' : ''}
                    onclick="event.stopPropagation(); toggleDropdownItem('${escapeHtml(lang).replace(/'/g, "\\'")}')">
             <label>${escapeHtml(lang)}</label>
-            <span class="lang-count">${count.toLocaleString()}</span>
+            <span class="lang-count">${count.toLocaleString()} coincidences</span>
         </div>
     `).join('');
 }
@@ -301,11 +298,9 @@ function setLanguageMode(mode) {
     // Update the label text
     const label = document.getElementById('languageFilterLabel');
     if (mode === 'all') {
-        label.textContent = `Filter by language (all ${allLanguagesData.length} languages):`;
-    } else if (mode === 'top500') {
-        label.textContent = `Filter by language (top 500 languages by coincidences):`;
+        label.textContent = `Search all ${allLanguagesData.length} languages.`;
     } else {
-        label.textContent = `Filter by language (top 120 languages by coincidences):`;
+        label.textContent = `Search the top 300 languages by number of word coincidences.`;
     }
     
     // Re-render dropdown if open
@@ -398,11 +393,9 @@ async function searchDatabase(query) {
     // Build the list of allowed languages based on languageMode
     let allowedLanguages = null;  // null means no restriction
     if (selectedLanguages.length === 0) {
-        // If no specific languages selected, filter by language mode (top 120, top 500, or all)
-        if (languageMode === 'top120') {
-            allowedLanguages = new Set(allLanguagesData.slice(0, TOP_120_COUNT).map(l => l.lang));
-        } else if (languageMode === 'top500') {
-            allowedLanguages = new Set(allLanguagesData.slice(0, TOP_500_COUNT).map(l => l.lang));
+        // If no specific languages selected, filter by language mode (top 300 or all)
+        if (languageMode === 'top300') {
+            allowedLanguages = new Set(allLanguagesData.slice(0, TOP_300_COUNT).map(l => l.lang));
         }
         // If languageMode is 'all', allowedLanguages stays null (no restriction)
     }
@@ -486,6 +479,10 @@ function switchMode(mode, button) {
     document.getElementById('exploreMode').style.display = mode === 'explore' ? 'block' : 'none';
     
     if (mode === 'explore' && allLanguagesData.length > 0) {
+        // Ensure top 300 button is active by default
+        exploreLangMode = 'top300';
+        document.querySelectorAll('#exploreMode .lang-mode-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('exploreLangMode-top300').classList.add('active');
         renderExploreLanguageList();
     }
 }
@@ -506,10 +503,8 @@ function renderExploreLanguageList() {
     let langsToShow;
     if (exploreLangMode === 'all') {
         langsToShow = allLanguagesData;
-    } else if (exploreLangMode === 'top500') {
-        langsToShow = allLanguagesData.slice(0, TOP_500_COUNT);
     } else {
-        langsToShow = allLanguagesData.slice(0, TOP_120_COUNT);
+        langsToShow = allLanguagesData.slice(0, TOP_300_COUNT);
     }
     
     // Sort alphabetically
@@ -531,7 +526,7 @@ function renderExploreLanguageList() {
                    ${exploreSelectedLanguages.includes(lang) ? 'checked' : ''}
                    onchange="toggleExploreLanguage('${escapeHtml(lang).replace(/'/g, "\\'")}')">
             <span class="lang-name">${escapeHtml(lang)}</span>
-            <span class="lang-count">${count.toLocaleString()}</span>
+            <span class="lang-count">${count.toLocaleString()} coincidences</span>
         </label>
     `).join('');
 }

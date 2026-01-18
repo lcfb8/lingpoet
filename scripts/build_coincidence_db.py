@@ -11,9 +11,13 @@ Filtering criteria (to emphasize accidental matches, not loanwords/related roots
 - Remove entries whose language is Translingual.
 - Remove any group containing a language pair listed in lexical_similarity.csv
   (language names are case-insensitive, parsed from the repo root).
+  -This filter is currently disabled as it was too aggressive, removing all matches 
+   for groups with ANY excluded language pair, even when other languages had 
+   completely different meanings. A refined approach is needed to remove only 
+   specific language pairs instead of entire groups. To be continued. 
 - Remove hyphenated words from spelling-only matches (keep only if they also
   appear in pronunciation matches).
-- Remove words longer than 9 letters (likely to be etymologically related).
+- Remove Latin-script words longer than 9 letters (likely to be etymologically related).
 - Per-language gloss cleanup when grouping:
   * Deduplicate gloss strings.
   * Drop glosses starting with "Initialism of", "Acronym of", or "Abbreviation of" (case-insensitive),
@@ -48,8 +52,10 @@ def tokenize_gloss(text):
 def has_disallowed_punctuation(word):
     if not word:
         return True
+    import unicodedata
     for ch in word:
-        if ch.isalnum() or ch in ALLOWED_WORD_CHARS:
+        # Allow alphanumeric, allowed word chars, and combining/mark characters (diacritics, viramas, etc.)
+        if ch.isalnum() or ch in ALLOWED_WORD_CHARS or unicodedata.category(ch).startswith('M'):
             continue
         return True
     return False
@@ -64,27 +70,44 @@ def has_hyphen(word):
         return False
     return "-" in word
 
+def is_latin_script(word):
+    """Check if a word is primarily written in Latin script."""
+    if not word:
+        return False
+    # Count Latin characters (a-z, A-Z, and common diacritics)
+    latin_chars = sum(1 for ch in word if ord(ch) < 0x0370 and (ch.isalpha() or ch in ALLOWED_WORD_CHARS))
+    total_chars = len([ch for ch in word if ch.isalpha() or ch in ALLOWED_WORD_CHARS])
+    # If more than 50% of characters are Latin script, consider it Latin
+    return total_chars > 0 and (latin_chars / total_chars) > 0.5
+
 def normalize_language(lang):
     if not lang:
         return ""
     return " ".join(lang.strip().lower().split())
 
 def load_lexical_similarity_pairs():
-    pairs = set()
-    if not os.path.exists(LEXICAL_SIMILARITY_CSV):
-        return pairs
-    with open(LEXICAL_SIMILARITY_CSV, "r", encoding="utf-8") as handle:
-        for line in handle:
-            raw = line.strip()
-            if not raw or raw.startswith("#"):
-                continue
-            parts = [normalize_language(p) for p in raw.split(",") if p.strip()]
-            if len(parts) != 2:
-                continue
-            if not parts[0] or not parts[1]:
-                continue
-            pairs.add(frozenset(parts))
-    return pairs
+    # DISABLED: This filter was too aggressive, rejecting entire word groups
+    # if ANY pair of languages was excluded, even when other languages had
+    # completely different meanings.
+    # TODO: Refine to remove only specific language pairs instead of entire groups
+    return set()
+    
+    # Original implementation (commented out):
+    # pairs = set()
+    # if not os.path.exists(LEXICAL_SIMILARITY_CSV):
+    #     return pairs
+    # with open(LEXICAL_SIMILARITY_CSV, "r", encoding="utf-8") as handle:
+    #     for line in handle:
+    #         raw = line.strip()
+    #         if not raw or raw.startswith("#"):
+    #             continue
+    #         parts = [normalize_language(p) for p in raw.split(",") if p.strip()]
+    #         if len(parts) != 2:
+    #             continue
+    #         if not parts[0] or not parts[1]:
+    #             continue
+    #         pairs.add(frozenset(parts))
+    # return pairs
 
 def has_excluded_language_pair(entries, excluded_pairs):
     if not excluded_pairs:
@@ -126,14 +149,30 @@ def is_english_self_gloss(entry, english_words_norm):
             return True
     return False
 
+def is_self_referential_gloss(entry):
+    """Check if the gloss is just the word itself (e.g., Spanish word 'hola' with gloss 'hola')."""
+    word = (entry.get("word") or "").strip()
+    glosses = (entry.get("glosses") or "").strip()
+    if not word or not glosses:
+        return False
+    word_norm = normalize_for_comparison(word)
+    parts = re.split(r"[;|/,]", glosses)
+    # Check if any gloss part is just the word itself
+    for part in parts:
+        part_norm = normalize_for_comparison(part)
+        if part_norm == word_norm:
+            return True
+    return False
+
 def filter_entries(entries):
     filtered = [
         e for e in entries
         if not has_disallowed_punctuation(e.get("word", ""))
         and not is_multiword(e.get("word", ""))
         and not is_alternative_form_gloss(e)
+        and not is_self_referential_gloss(e)
         and normalize_language(e.get("lang")) != "translingual"
-        and len(e.get("word", "")) <= 9
+        and (not is_latin_script(e.get("word", "")) or len(e.get("word", "")) <= 9)
     ]
     english_words_norm = {
         normalize_for_comparison(e.get("word", ""))
@@ -247,14 +286,15 @@ def reduce_entries(entries):
             combined[lang]["glosses"].extend(glosses_split)
     reduced = []
     for data in combined.values():
-        # Deduplicate glosses and drop empty values
+        # Deduplicate glosses and drop empty values (case-insensitive)
         raw_glosses = [g for g in data["glosses"] if g]
         seen_gloss = set()
         deduped = []
         for g in raw_glosses:
-            if g in seen_gloss:
+            g_lower = g.lower()
+            if g_lower in seen_gloss:
                 continue
-            seen_gloss.add(g)
+            seen_gloss.add(g_lower)
             deduped.append(g)
 
         # Remove glosses that start with "Initialism of", "Acronym of", or "Abbreviation of" (case-insensitive),
