@@ -55,10 +55,9 @@
 
                 <div class="language-filter-section">
                     <div class="filter-header">
-                        <strong id="languageFilterLabel">Filter by language (top 120 languages by number of coincidences):</strong>
+                        <strong id="languageFilterLabel">Search the top 300 languages by number of word coincidences.</strong>
                         <div class="lang-mode-buttons">
-                            <button id="langMode-top120" class="lang-mode-btn active" onclick="setLanguageMode('top120')">Top 120</button>
-                            <button id="langMode-top500" class="lang-mode-btn" onclick="setLanguageMode('top500')">Top 500</button>
+                            <button id="langMode-top300" class="lang-mode-btn active" onclick="setLanguageMode('top300')">Top 300</button>
                             <button id="langMode-all" class="lang-mode-btn" onclick="setLanguageMode('all')">All languages</button>
                         </div>
                     </div>
@@ -97,11 +96,10 @@
             <div id="exploreMode" style="display: none;">
                 <div class="search-section">
                     <h3 style="margin-bottom: 0.5rem;">Select Languages to Compare</h3>
-                    <p class="muted" style="margin-bottom: 1rem;">Choose 2 or more languages to see all word coincidences between them</p>
+                    <p class="muted" style="margin-bottom: 1rem;">Choose 2 or more languages to see all word coincidences (by spelling and pronunciation) between them. Select from the top 300 languages (by number of coincidences), or all 2000+ languages.</p>
                     
                     <div class="lang-mode-buttons" style="margin-bottom: 1rem;">
-                        <button id="exploreLangMode-top120" class="lang-mode-btn active" onclick="setExploreLangMode('top120')">Top 120</button>
-                        <button id="exploreLangMode-top500" class="lang-mode-btn" onclick="setExploreLangMode('top500')">Top 500</button>
+                        <button id="exploreLangMode-top300" class="lang-mode-btn active" onclick="setExploreLangMode('top300')">Top 300</button>
                         <button id="exploreLangMode-all" class="lang-mode-btn" onclick="setExploreLangMode('all')">All languages</button>
                     </div>
                     

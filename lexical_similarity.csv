@@ -1,3 +1,7 @@
+This CSV was used as a way to not include coincidences between languages that are very closely related. 
+However, this ended up causing issues because the search excluded all coincidences if there was one pair of excluded languages.
+So for now, I have turned this filtering off; it can be reexplored in the future. 
+
 #romance 
 french, old french
 french, middle french

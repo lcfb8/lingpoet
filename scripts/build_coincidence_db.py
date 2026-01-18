@@ -82,21 +82,28 @@ def normalize_language(lang):
     return " ".join(lang.strip().lower().split())
 
 def load_lexical_similarity_pairs():
-    pairs = set()
-    if not os.path.exists(LEXICAL_SIMILARITY_CSV):
-        return pairs
-    with open(LEXICAL_SIMILARITY_CSV, "r", encoding="utf-8") as handle:
-        for line in handle:
-            raw = line.strip()
-            if not raw or raw.startswith("#"):
-                continue
-            parts = [normalize_language(p) for p in raw.split(",") if p.strip()]
-            if len(parts) != 2:
-                continue
-            if not parts[0] or not parts[1]:
-                continue
-            pairs.add(frozenset(parts))
-    return pairs
+    # DISABLED: This filter was too aggressive, rejecting entire word groups
+    # if ANY pair of languages was excluded, even when other languages had
+    # completely different meanings.
+    # TODO: Refine to remove only specific language pairs instead of entire groups
+    return set()
+    
+    # Original implementation (commented out):
+    # pairs = set()
+    # if not os.path.exists(LEXICAL_SIMILARITY_CSV):
+    #     return pairs
+    # with open(LEXICAL_SIMILARITY_CSV, "r", encoding="utf-8") as handle:
+    #     for line in handle:
+    #         raw = line.strip()
+    #         if not raw or raw.startswith("#"):
+    #             continue
+    #         parts = [normalize_language(p) for p in raw.split(",") if p.strip()]
+    #         if len(parts) != 2:
+    #             continue
+    #         if not parts[0] or not parts[1]:
+    #             continue
+    #         pairs.add(frozenset(parts))
+    # return pairs
 
 def has_excluded_language_pair(entries, excluded_pairs):
     if not excluded_pairs:
