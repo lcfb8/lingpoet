@@ -20,6 +20,7 @@ portuguese, Catalan
 #germanic
 limburgish, german
 low german, german
+german, pennsylvania german
 galician, portuguese
 galician, spanish
 galician, Catalan
@@ -71,17 +72,22 @@ Arabic, moroccan arabic
 arabic, south levantine arabic
 arabic, north levantine arabic
 
+#Slavic
+Czech, old Czech
+czech, Slovak
+old czech, Slovak
+russian, Bulgarian
+russian, Ukrainian
+russian, Macedonian
+bulgarian, macedonian
+polish, old polish
+
 #other
 estonian, finnish
 karelian, finnish
 votic, finnish
 zulu, xhosa
 swahili, tumbuka
-russian, Bulgarian
-russian, Ukrainian
-russian, Macedonian
-bulgarian, macedonian
-polish, old polish
 ido, esperanto
 basque, proto-basque
 turkish, Azerbaijani
