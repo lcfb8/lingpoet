@@ -8,4 +8,4 @@ data/
 node_modules
 *.log
 .vscode/
-to_be_deleted/
+to-be-deleted/
