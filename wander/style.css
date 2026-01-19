@@ -2,6 +2,11 @@
 
 /* Peek tiles */
 .peek-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin: 2rem auto;
+  max-width: 980px;
   display: flex;
   align-items: stretch;
   justify-content: center;
@@ -279,11 +284,18 @@
   }
 
   .peek-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
 
   .peek {
     flex: 0 0 180px;
     height: 220px;
+  }
+}
+
+@media (max-width: 520px) {
+  .peek-grid {
+    grid-template-columns: 1fr;
   }
 }

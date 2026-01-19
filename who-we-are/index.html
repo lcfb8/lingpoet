@@ -31,7 +31,13 @@
               <li><a href="index.html" class="active">Who We Are</a></li>
             </ul>
 
-            <div class="nav__right" aria-hidden="true"></div>
+            <!-- Mobile menu toggle -->
+            <button class="nav__toggle" aria-label="Toggle navigation" aria-expanded="false">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+
           </nav>
         </header>
 
@@ -138,5 +144,46 @@
             </p>
           </div>
         </footer>
-      </body>
+
+        <script>
+          // Mobile navigation toggle
+          const navToggle = document.querySelector('.nav__toggle');
+          const navLinks = document.querySelector('.nav__links');
+          
+          if (navToggle) {
+            navToggle.addEventListener('click', () => {
+              navToggle.classList.toggle('active');
+              navLinks.classList.toggle('active');
+              
+              const isExpanded = navToggle.classList.contains('active');
+              navToggle.setAttribute('aria-expanded', isExpanded);
+              
+              if (isExpanded) {
+                document.body.style.overflow = 'hidden';
+              } else {
+                document.body.style.overflow = '';
+              }
+            });
+
+            const navLinksItems = navLinks.querySelectorAll('a');
+            navLinksItems.forEach(link => {
+              link.addEventListener('click', () => {
+                navToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+              });
+            });
+
+            document.addEventListener('click', (e) => {
+              if (!e.target.closest('.nav') && navLinks.classList.contains('active')) {
+                navToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+              }
+            });
+          }
+        </script>
+
     </html>

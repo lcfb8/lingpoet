@@ -1,7 +1,7 @@
 /* Wander page interactive functionality */
 
 (async function () {
-  const DB_URL = "https://raw.githubusercontent.com/lcfb8/lingpoet-data/main/coincidences.db.gz";
+  const DB_URL = "../data/coincidences.db.gz";
   const statusEl = document.getElementById("status");
   const goBtn = document.getElementById("go-wander");
   const grid = document.getElementById("peek-grid");
