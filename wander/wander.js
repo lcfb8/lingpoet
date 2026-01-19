@@ -7,6 +7,7 @@
   const goBtn = document.getElementById("go-wander");
   const grid = document.getElementById("peek-grid");
   let dataset = []; // rows read from DB only
+  const TILE_COUNT = 6;
 
   const setStatus = (s) => { if (statusEl) statusEl.textContent = s; };
 
@@ -198,17 +199,33 @@
 
     function pickRandomWords() {
       const chosen = [];
-      const p = shuffle(primaryCandidates.slice()).filter(meetsLengthRequirement);
-      for (const w of p) { if (chosen.length===5) break; chosen.push(w); }
-      if (chosen.length < 6) {
-        const s = shuffle(secondaryCandidates.slice()).filter(meetsLengthRequirement);
-        for (const w of s) { if (chosen.length===5) break; if (!chosen.includes(w)) chosen.push(w); }
+
+      const p = shuffle(primaryCandidates.slice());
+      for (const w of p) { if (chosen.length === TILE_COUNT) break; chosen.push(w); }
+      if (chosen.length < TILE_COUNT) {
+        const s = shuffle(secondaryCandidates.slice());
+        for (const w of s) { if (chosen.length === TILE_COUNT) break; if (!chosen.includes(w)) chosen.push(w); }
       }
-      if (chosen.length < 6) {
-        const rest = shuffle(allWords.slice()).filter(meetsLengthRequirement);
-        for (const w of rest) { if (chosen.length===5) break; if (!chosen.includes(w)) chosen.push(w); }
+      if (chosen.length < TILE_COUNT) {
+        const rest = shuffle(allWords.slice());
+        for (const w of rest) { if (chosen.length === TILE_COUNT) break; if (!chosen.includes(w)) chosen.push(w); }
       }
-      return chosen.slice(0,5).map(w => ({ word: w }));
+      // If for any reason we still have fewer than TILE_COUNT (rare), pad with random words
+      let attempts = 0;
+      while (chosen.length < TILE_COUNT && attempts < 100) {
+        const pick = allWords[Math.floor(Math.random() * allWords.length)];
+        if (pick && !chosen.includes(pick)) chosen.push(pick);
+        attempts++;
+      }
+      // As a last resort allow duplicates to reach TILE_COUNT
+      while (chosen.length < TILE_COUNT) {
+        const pick = allWords[Math.floor(Math.random() * allWords.length)];
+        chosen.push(pick || `word-${chosen.length}`);
+      }
+
+      const result = chosen.slice(0, TILE_COUNT).map(w => ({ word: w }));
+      console.log(`🧩 pickRandomWords → ${result.length} items`, result.map(r => r.word));
+      return result;
     }
 
     function renderTiles(items){
@@ -293,7 +310,7 @@
     try {
       const initialItems = pickRandomWords();
       renderTiles(initialItems);
-      setStatus("Tap a tile to reveal IPA and meanings. Click Go wander for new results.");
+      setStatus(`Displaying ${initialItems.length} tiles. Tap a tile to reveal IPA and meanings.`);
     } catch (e) {
       console.warn('Could not render initial tiles:', e);
     }
@@ -302,7 +319,7 @@
       setStatus("Generating words…");
       const items = pickRandomWords();
       renderTiles(items);
-      setStatus("Tap a tile to reveal IPA and meanings.");
+      setStatus(`Displaying ${items.length} tiles. Tap a tile to reveal IPA and meanings.`);
 
       // Only scroll if the grid is not fully visible in the viewport.
       const rect = grid.getBoundingClientRect();
