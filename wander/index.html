@@ -45,10 +45,33 @@
           We’re not chasing shared roots — just delightful accidents.
           As linguists, we are interested in all words, even those that may be considered slang, informal, or vulgar.
         </p>
+        <hr>
       </section>
+    
+        <!-- 4) Sneak peek (playful + interactive) -->
+        <div class="narrow-gutters">
+        <section class="section" aria-labelledby="peek-title">
+          <header class="section__header">
+            <h2 id="peek-title">Sneak peek: tap to reveal</h2>
+            <p class="section__lede">
+              Click "Go wander" to surface 5 coincident words that appear in three or more languages in the dataset. Tap a tile to reveal IPA and meanings for up to three languages.
+            </p>
+          </header>
 
-      <!-- 1) Quirky fun fact -->
-      <section class="panel" aria-labelledby="funfact-title">
+          <div class="peek-controls peek-controls--center">
+            <div class="peek-controls__row" style="justify-content:center;">
+              <button id="go-wander" class="pill" disabled>Go wander</button>
+              <div id="status" class="muted" style="margin-left:1rem;">Loading database…</div>
+            </div>
+          </div>
+
+          <div id="peek-grid" class="peek-grid" aria-live="polite" role="list">
+            <!-- five tiles injected here -->
+          </div>
+        </section>
+
+        <!-- 1) Quirky fun fact -->
+        <section class="panel" aria-labelledby="funfact-title">
         <div class="panel__inner split">
           <figure class="media">
             <img src="../images/glad_rooster.jpg" alt="A sign reading 'glad rooster'">
@@ -191,42 +214,20 @@
           </div>
         </div>
       </section>
-
-      <!-- 4) Sneak peek (playful + interactive) -->
-      <section class="section" aria-labelledby="peek-title">
-        <header class="section__header">
-          <h2 id="peek-title">Sneak peek: tap to reveal</h2>
-          <p class="section__lede">
-            Click "Go wander" to surface 6 coincident words that appear in three or more languages in the dataset. Tap a tile to reveal IPA and meanings for up to three languages.
-          </p>
-        </header>
-
-        <div class="peek-controls peek-controls--center">
-          <div class="peek-controls__row" style="justify-content:center;">
-            <button id="go-wander" class="pill" disabled>Go wander</button>
-            <div id="status" class="muted" style="margin-left:1rem;">Loading database…</div>
+      
+      <div class="peek-footer">
+        <div class="btw__cta" style="width:100%; max-width:950px; margin:0 auto;">
+          <div class="btw__cta-text" style="flex:1; min-width:0;">
+            <h3 class="card__title" style="margin-bottom:0.25rem;">Come & Play</h3>
+            <p class="card__text" style="margin:0;">
+              Explore coincidences. Make unexpected connections. Find something funny. Write poetry.
+            </p>
+          </div>
+          <div style="margin-left:1rem;">
+            <a class="btw__button" href="../words-studio/search.html">Open Words Studio →</a>
           </div>
         </div>
-
-        <div id="peek-grid" class="peek-grid" aria-live="polite" role="list">
-          <!-- six tiles injected here -->
-        </div>
-
-        <div class="peek-footer">
-          <div class="btw__cta" style="width:100%; max-width:950px; margin:0 auto;">
-            <div class="btw__cta-text" style="flex:1; min-width:0;">
-              <h3 class="card__title" style="margin-bottom:0.25rem;">Come & Play</h3>
-              <p class="card__text" style="margin:0;">
-                Explore coincidences. Make unexpected connections. Find something funny. Write poetry.
-              </p>
-            </div>
-            <div style="margin-left:1rem;">
-              <a class="btw__button" href="../words-studio/search.html">Open Words Studio →</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      </div>
     </main>
 
     <!-- Footer (same vibe as homepage) -->

@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Who We Are | LingPoet</title>
-        <link rel="stylesheet" href="../style.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
-    </head>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who We Are | LingPoet</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
+  </head>
 
     <body>
         <!-- Top Navigation -->
@@ -33,10 +36,19 @@
         </header>
 
         <article id="about" class="about">
+
+        <!-- Hero -->
+        <section class="hero who-hero" aria-label="Who We Are banner">
+          <img class="hero__img" src="banner-image.jpeg" alt="Banner image for Who We Are">
+          <div class="hero__overlay" aria-hidden="true"></div>
+        </section>
+
+        <!-- thin accent bar under hero -->
+        <div class="hero-accent" aria-hidden="true"></div>
+
         <header class="opening-section">
-            <div class="opening-content">
-                <h1 class="opening-title">About Us</h1>
- 
+            <div class="opening-content"></div>
+
              <!-- Opening -->
              <div class="about-content">
                  <p>
@@ -52,8 +64,8 @@
                  </p>
              </div>
              </div>
-         </header>
          <hr>
+         </header>
  
         <!-- Lydia (image left, text right) -->
         <section class="split-section-lidya" aria-labelledby="lydia-heading">
@@ -103,15 +115,13 @@
                 <img src="elsa.jpg" alt="Portrait of Elsa">
             </div>
         </section>
-        <hr>
 
+        <hr>
         <!-- Together -->
-        <section class="together-panel panel panel--soft" aria-labelledby="together-heading">
-          <div class="panel__inner together-grid">
+        <section class="together-panel">
               <p>Lydia and Elsa are co-authors of this website. They share a love for words, an eye for detail, and a belief that language shapes how we pay attention.</p>
               <p>One tends to ask <em>how language works</em>. The other wonders <em>what it does to us</em>.</p>
               <p>They sometimes agree. They often edit each other.</p>
-          </div>
         </section>
         
         </article>

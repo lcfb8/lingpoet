@@ -2,15 +2,55 @@
 
 /* Peek tiles */
 .peek-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
   gap: 1.5rem;
   margin: 2rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+  padding-inline: 0.75rem;
+  padding-left: 10rem;
+  padding-right: 3rem;
+}
+
+/* Narrow gutters wrapper used only for Sneak peek + Quirky fun fact */
+.narrow-gutters {
+  /* cancel out page horizontal padding (1.5rem) so this block can use more width */
+  width: calc(100% + 3rem);
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .narrow-gutters {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Narrower side gutters only for the quirky fun-fact panel */
+.panel[aria-labelledby="funfact-title"] .panel__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
 }
 
 .peek {
   position: relative;
   cursor: pointer;
+  /* fixed tile height so all tiles match */
+  height: 160px;
+  box-sizing: border-box;
+  /* fixed width so every tile is identical */
+  flex: 0 0 165px;
 }
 
 .peek__front {
@@ -18,7 +58,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 150px;
+  height: 100%;
   padding: 1.5rem;
   background: var(--color-light, #f5f5f5);
   border: 1px solid var(--color-border, #ddd);
@@ -47,12 +87,28 @@
 }
 
 .peek__back {
-  display: block;
+  display: none;
   padding: 1.5rem;
   background: var(--color-light, #f5f5f5);
   border: 1px solid var(--color-border, #ddd);
   border-radius: 4px;
-  margin-top: 0.5rem;
+  /* let the back size itself based on content when shown */
+  height: auto;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Only show one side at a time so the tile height stays fixed */
+.peek[open] .peek__front {
+  display: none;
+}
+.peek[open] .peek__back {
+  display: block;
+}
+
+/* When a tile is opened, allow it to grow to fit its content */
+.peek[open] {
+  height: auto;
 }
 
 .meaning-row {
@@ -147,7 +203,8 @@
 .pairs-table {
   display: flex;
   flex-direction: column;
-  margin: 2rem 0;
+  max-width: 950px; /* constrain width and center on the page */
+  margin: 2rem auto;
   border: 1px solid var(--color-border, #ddd);
   border-radius: 4px;
   overflow: hidden;
@@ -222,7 +279,11 @@
   }
 
   .peek-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;
+  }
+
+  .peek {
+    flex: 0 0 180px;
+    height: 220px;
   }
 }
