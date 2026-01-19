@@ -201,7 +201,25 @@
       const items = pickRandomWords();
       renderTiles(items);
       setStatus("Tap a tile to reveal IPA and meanings.");
-      grid.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // Only scroll if the grid is not fully visible in the viewport.
+      const rect = grid.getBoundingClientRect();
+      const header = document.querySelector('.topbar');
+      const headerHeight = header ? header.offsetHeight : 86;
+      const gridFullyVisible = rect.top >= headerHeight && rect.bottom <= window.innerHeight;
+
+      if (!gridFullyVisible) {
+        // Scroll so the "Sneak peek" title remains visible below the sticky header.
+        const title = document.getElementById('peek-title');
+        if (title) {
+          const titleRect = title.getBoundingClientRect();
+          const target = window.pageYOffset + titleRect.top - headerHeight - 12; // small gap
+          window.scrollTo({ top: target, behavior: 'smooth' });
+        } else {
+          // fallback: scroll grid into view at top
+          grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
     });
 
   } catch (err) {
