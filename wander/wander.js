@@ -159,6 +159,16 @@
       if (r.language) byWord[r.word].langs.add(String(r.language));
     }
 
+    // Apply filtering again at the word level to handle cases where the same word
+    // appears in multiple database rows (e.g., both spelling and pronunciation matches)
+    for (const word in byWord) {
+      if (byWord[word].rows.length > 1) {
+        byWord[word].rows = filterRelatedLanguages(byWord[word].rows);
+        // Rebuild langs set after filtering
+        byWord[word].langs = new Set(byWord[word].rows.map(r => r.language).filter(Boolean));
+      }
+    }
+
     // candidates: words present in >=3 distinct languages
     const primaryCandidates = Object.entries(byWord).filter(([w,v]) => v.langs.size >= 3).map(([w]) => w);
     // secondary: >=2 languages
