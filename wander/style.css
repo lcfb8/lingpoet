@@ -3,21 +3,20 @@
 /* Peek tiles */
 .peek-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+
+  /* slightly wider fixed columns but allow them to shrink if necessary */
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  grid-auto-rows: auto;
+  gap: 2rem;
   margin: 2rem auto;
   max-width: 980px;
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 1.5rem;
   margin: 2rem 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   padding-bottom: 0.5rem;
   padding-inline: 0.75rem;
-  padding-left: 10rem;
-  padding-right: 3rem;
+  max-width: 980px; /* constrain overall grid so it doesn't overflow the page */
 }
 
 /* Narrow gutters wrapper used only for Sneak peek + Quirky fun fact */
@@ -26,8 +25,8 @@
   width: calc(100% + 3rem);
   margin-left: -1.5rem;
   margin-right: -1.5rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+  padding-left: 4rem;
+  padding-right: 4rem;
 }
 
 @media (max-width: 900px) {
@@ -35,8 +34,8 @@
     width: 100%;
     margin-left: 0;
     margin-right: 0;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
@@ -52,10 +51,10 @@
   position: relative;
   cursor: pointer;
   /* fixed tile height so all tiles match */
-  height: 160px;
+  height: 100px;
   box-sizing: border-box;
   /* fixed width so every tile is identical */
-  flex: 0 0 165px;
+  width: 220px;
 }
 
 .peek__front {
@@ -289,7 +288,7 @@
   }
 
   .peek {
-    flex: 0 0 180px;
+    width: 200px;
     height: 220px;
   }
 }
