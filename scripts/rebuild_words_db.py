@@ -13,6 +13,12 @@ Usage:
 Requires:
     - Raw data file at ~/Development/raw-wiktextract-data.jsonl
     - Or set RAW_DATA environment variable to the path
+
+Known Issues:
+    - Some native words may be incorrectly filtered as loanwords (e.g., Spanish "pato" 
+      meaning "duck" is filtered, likely due to category/etymology data in Wiktionary).
+      The loanword filter uses both Wiktionary categories and etymology text, but may 
+      have false positives.
 """
 
 import json
@@ -113,16 +119,36 @@ def has_digits(word):
 
 
 def is_loanword(entry):
-    """Check if entry is a loanword based on etymology.
+    """Check if entry is a loanword based on etymology or categories.
     
-    Detects phrases like "borrowed from" and "unadapted borrowing from"
-    which indicate the word was taken from another language.
+    Two methods of detection:
+    1. Etymology: Detects phrases like "borrowed from" and "unadapted borrowing from"
+       at the BEGINNING of the etymology text, which indicate the word was 
+       taken from another language. If these phrases appear later in the 
+       etymology (e.g., referring to an older root), the entry is not 
+       considered a loanword.
+    2. Categories: Checks for Wiktionary categories like "English terms borrowed from French"
+       which explicitly mark borrowed terms.
     """
+    # Check categories first (more reliable)
+    categories = entry.get("categories", [])
+    if categories:
+        lang = entry.get("lang", "").strip()
+        for cat in categories:
+            cat_lower = cat.lower()
+            # Match patterns like "English terms borrowed from French"
+            if lang.lower() in cat_lower and "terms borrowed from" in cat_lower:
+                return True
+    
+    # Check etymology text
     etymology = entry.get("etymology_text", "") or entry.get("etymology", "")
     if not etymology:
         return False
-    etymology_lower = etymology.lower()
-    return "borrowed from" in etymology_lower or "unadapted borrowing from" in etymology_lower
+    etymology_lower = etymology.lower().strip()
+    # Only match if borrowing phrases appear at the very beginning
+    return (etymology_lower.startswith("borrowed from") or 
+            etymology_lower.startswith("unadapted borrowing from") or
+            etymology_lower.startswith("borrowing from"))
 
 
 def process_data():

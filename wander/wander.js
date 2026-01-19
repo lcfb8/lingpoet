@@ -2,6 +2,7 @@
 
 (async function () {
   const DB_URL = "../data/coincidences.db";
+  const GLOSS_OVERLAP_THRESHOLD = 0.10; // 10% - match the Python threshold
   const statusEl = document.getElementById("status");
   const goBtn = document.getElementById("go-wander");
   const grid = document.getElementById("peek-grid");
@@ -9,6 +10,74 @@
   const TILE_COUNT = 6;
 
   const setStatus = (s) => { if (statusEl) statusEl.textContent = s; };
+
+  // Tokenize gloss for overlap calculation (matches Python logic)
+  const STOP_WORDS = new Set([
+    'the', 'and', 'for', 'are', 'was', 'were', 'has', 'have', 'had',
+    'with', 'from', 'that', 'this', 'these', 'those', 'than', 'then',
+    'such', 'when', 'where', 'what', 'which', 'who', 'whom', 'whose',
+    'been', 'being', 'does', 'did', 'will', 'would', 'could', 'should',
+    'may', 'might', 'must', 'can', 'its', 'not', 'but', 'all', 'any',
+    'some', 'each', 'every', 'both', 'few', 'more', 'most', 'other',
+    'into', 'through', 'during', 'before', 'after', 'above', 'below',
+    'between', 'under', 'again', 'further', 'once', 'here', 'there',
+    'also', 'only', 'own', 'same', 'very', 'just', 'now', 'used'
+  ]);
+
+  function tokenizeGloss(text) {
+    if (!text) return new Set();
+    const tokens = text.toLowerCase().match(/[a-z]+/g) || [];
+    return new Set(tokens.filter(t => t.length > 2 && !STOP_WORDS.has(t)));
+  }
+
+  function calculateOverlap(tokens1, tokens2) {
+    if (!tokens1.size || !tokens2.size) return 0;
+    const intersection = new Set([...tokens1].filter(t => tokens2.has(t)));
+    const union = new Set([...tokens1, ...tokens2]);
+    return intersection.size / union.size;
+  }
+
+  // Filter out languages with overlapping meanings, keep one representative per cluster
+  function filterRelatedLanguages(entries) {
+    if (entries.length < 2) return entries;
+    
+    // Build token sets for each entry
+    const entriesWithTokens = entries.map(e => ({
+      ...e,
+      tokens: tokenizeGloss(e.meaning)
+    }));
+    
+    // Build clusters of related languages
+    const clusters = [];
+    const assigned = new Set();
+    
+    for (let i = 0; i < entriesWithTokens.length; i++) {
+      if (assigned.has(i)) continue;
+      
+      const cluster = [i];
+      assigned.add(i);
+      
+      for (let j = i + 1; j < entriesWithTokens.length; j++) {
+        if (assigned.has(j)) continue;
+        
+        const overlap = calculateOverlap(
+          entriesWithTokens[i].tokens,
+          entriesWithTokens[j].tokens
+        );
+        
+        if (overlap >= GLOSS_OVERLAP_THRESHOLD) {
+          cluster.push(j);
+          assigned.add(j);
+        }
+      }
+      
+      clusters.push(cluster);
+    }
+    
+    // From each cluster, keep only one representative (first one in the cluster)
+    const keptIndices = clusters.map(cluster => cluster[0]);
+    return keptIndices.map(idx => entries[idx]);
+  }
 
   try {
     setStatus("Fetching database…");
@@ -55,13 +124,18 @@
           
           // Each entry in the JSON has the word data
           if (Array.isArray(entries)) {
-            for (const entry of entries) {
-              dataset.push({
-                word: entry.word || matchKey || "",
-                ipa: entry.ipa || "",
-                language: entry.lang || entry.lang_code || "",
-                meaning: entry.glosses || entry.gloss || entry.meaning || ""
-              });
+            // Filter out related languages (e.g., Arabic dialects with same meaning)
+            const mappedEntries = entries.map(entry => ({
+              word: entry.word || matchKey || "",
+              ipa: entry.ipa || "",
+              language: entry.lang || entry.lang_code || "",
+              meaning: entry.glosses || entry.gloss || entry.meaning || ""
+            }));
+            
+            const filteredEntries = filterRelatedLanguages(mappedEntries);
+            
+            for (const entry of filteredEntries) {
+              dataset.push(entry);
             }
           }
         }
@@ -86,6 +160,16 @@
       if (r.language) byWord[r.word].langs.add(String(r.language));
     }
 
+    // Apply filtering again at the word level to handle cases where the same word
+    // appears in multiple database rows (e.g., both spelling and pronunciation matches)
+    for (const word in byWord) {
+      if (byWord[word].rows.length > 1) {
+        byWord[word].rows = filterRelatedLanguages(byWord[word].rows);
+        // Rebuild langs set after filtering
+        byWord[word].langs = new Set(byWord[word].rows.map(r => r.language).filter(Boolean));
+      }
+    }
+
     // candidates: words present in >=3 distinct languages
     const primaryCandidates = Object.entries(byWord).filter(([w,v]) => v.langs.size >= 3).map(([w]) => w);
     // secondary: >=2 languages
@@ -95,8 +179,27 @@
 
     function shuffle(a){ for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
 
+    // Check if a word uses Latin script (basic Latin alphabet characters)
+    function isLatinScript(word) {
+      if (!word) return false;
+      // Check if word contains mostly Latin characters (a-z, A-Z, accented letters)
+      // Latin extended includes characters up to U+024F
+      const latinPattern = /^[\u0020-\u024F\u1E00-\u1EFF]+$/;
+      return latinPattern.test(word);
+    }
+
+    // Filter word by length: Latin script <= 5 chars, other scripts unrestricted
+    function meetsLengthRequirement(word) {
+      if (!word) return false;
+      if (isLatinScript(word)) {
+        return word.length <= 5;
+      }
+      return true; // Non-Latin scripts have no restriction
+    }
+
     function pickRandomWords() {
       const chosen = [];
+
       const p = shuffle(primaryCandidates.slice());
       for (const w of p) { if (chosen.length === TILE_COUNT) break; chosen.push(w); }
       if (chosen.length < TILE_COUNT) {
