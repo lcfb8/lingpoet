@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Who We Are | LingPoet</title>
-        <link rel="stylesheet" href="../style.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
-    </head>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who We Are | LingPoet</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
+  </head>
 
     <body>
         <!-- Top Navigation -->
@@ -28,15 +31,30 @@
               <li><a href="index.html" class="active">Who We Are</a></li>
             </ul>
 
-            <div class="nav__right" aria-hidden="true"></div>
+            <!-- Mobile menu toggle -->
+            <button class="nav__toggle" aria-label="Toggle navigation" aria-expanded="false">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+
           </nav>
         </header>
 
         <article id="about" class="about">
+
+        <!-- Hero -->
+        <section class="hero who-hero" aria-label="Who We Are banner">
+          <img class="hero__img" src="banner-image.jpeg" alt="Banner image for Who We Are">
+          <div class="hero__overlay" aria-hidden="true"></div>
+        </section>
+
+        <!-- thin accent bar under hero -->
+        <div class="hero-accent" aria-hidden="true"></div>
+
         <header class="opening-section">
-            <div class="opening-content">
-                <h1 class="opening-title">About Us</h1>
- 
+            <div class="opening-content"></div>
+
              <!-- Opening -->
              <div class="about-content">
                  <p>
@@ -52,8 +70,8 @@
                  </p>
              </div>
              </div>
-         </header>
          <hr>
+         </header>
  
         <!-- Lydia (image left, text right) -->
         <section class="split-section-lidya" aria-labelledby="lydia-heading">
@@ -103,15 +121,13 @@
                 <img src="elsa.jpg" alt="Portrait of Elsa">
             </div>
         </section>
-        <hr>
 
+        <hr>
         <!-- Together -->
-        <section class="together-panel panel panel--soft" aria-labelledby="together-heading">
-          <div class="panel__inner together-grid">
+        <section class="together-panel">
               <p>Lydia and Elsa are co-authors of this website. They share a love for words, an eye for detail, and a belief that language shapes how we pay attention.</p>
               <p>One tends to ask <em>how language works</em>. The other wonders <em>what it does to us</em>.</p>
               <p>They sometimes agree. They often edit each other.</p>
-          </div>
         </section>
         
         </article>
@@ -128,5 +144,46 @@
             </p>
           </div>
         </footer>
-      </body>
+
+        <script>
+          // Mobile navigation toggle
+          const navToggle = document.querySelector('.nav__toggle');
+          const navLinks = document.querySelector('.nav__links');
+          
+          if (navToggle) {
+            navToggle.addEventListener('click', () => {
+              navToggle.classList.toggle('active');
+              navLinks.classList.toggle('active');
+              
+              const isExpanded = navToggle.classList.contains('active');
+              navToggle.setAttribute('aria-expanded', isExpanded);
+              
+              if (isExpanded) {
+                document.body.style.overflow = 'hidden';
+              } else {
+                document.body.style.overflow = '';
+              }
+            });
+
+            const navLinksItems = navLinks.querySelectorAll('a');
+            navLinksItems.forEach(link => {
+              link.addEventListener('click', () => {
+                navToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+              });
+            });
+
+            document.addEventListener('click', (e) => {
+              if (!e.target.closest('.nav') && navLinks.classList.contains('active')) {
+                navToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                navToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+              }
+            });
+          }
+        </script>
+
     </html>
