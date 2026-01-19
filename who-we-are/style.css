@@ -35,6 +35,8 @@
   margin-top: 0;
   /* tighten the vertical gap so the opening appears sooner */
   padding: 0.6rem 1.5rem 0 1.5rem;
+  /* subtle darker background than the page paper */
+  background: rgba(22,22,22,0.03);
 }
 
 /* Slightly tighten the opening title and lede to match root scaling */
@@ -63,6 +65,17 @@
   margin-top: 0.25rem;
 }
 
+/* Portraits: slightly smaller with responsive limits */
+.split-media-lidya img,
+.split-media-elsa img {
+  width: clamp(180px, 20vw, 320px);
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
 /* Thin decorative accent under the hero */
 .hero-accent {
   width: 100%;
@@ -71,4 +84,70 @@
   min-height: 16px;
   max-height: 28px;
   background: #5b3a2e; /* chocolate tone that sits with the paper background */
+}
+
+/* Add vertical spacing between Lydia and Elsa sections */
+.split-section-lidya {
+  margin-bottom: 3cm; /* increased gap between sections */
+}
+
+@media (max-width: 720px) {
+  .split-section-lidya {
+    margin-bottom: 2rem; /* smaller gap on narrow screens */
+  }
+}
+
+/* Opening section divider — keep the HR visually at the bottom of the opening block */
+.opening-section > hr {
+  border: none;
+  height: 1px;
+  background: var(--rule, rgba(22,22,22,0.12));
+  margin: 0.9rem 1.5rem 1.25rem 1.5rem;
+}
+
+/* Add extra gap above the footer */
+.together-panel {
+  /* constrain the Together section inside the site's content width and center it */
+  max-width: var(--max);
+  margin: 2cm auto 0 auto;
+  background: var(--paper);
+  padding: 0;
+}
+
+@media (max-width: 720px) {
+  .together-panel { margin-bottom: 1.25rem; margin-top: 1rem; }
+}
+
+/* Make the Together section flow as normal content instead of a grid */
+.together-panel .panel__inner,
+.together-grid {
+  display: block !important;
+  grid-template-columns: none !important;
+  gap: 0 !important;
+}
+
+.together-panel .panel__inner p {
+  margin: 0 0 1rem 0;
+}
+
+/* Remove boxed/panel styling from the Together section to make it plain */
+.together-panel {
+  border: none !important;
+  box-shadow: none !important;
+}
+.together-panel .panel__inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 !important; /* remove inner padding so band is flush */
+}
+
+/* Center the Together section text and constrain line length */
+.together-panel {
+  text-align: center;
+}
+
+.together-panel p {
+  max-width: min(var(--content), 60ch);
+  margin: 0.6rem auto;
+  text-align: center;
 }
