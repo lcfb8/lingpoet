@@ -97,16 +97,16 @@
     function pickRandomWords() {
       const chosen = [];
       const p = shuffle(primaryCandidates.slice());
-      for (const w of p) { if (chosen.length===6) break; chosen.push(w); }
+      for (const w of p) { if (chosen.length===5) break; chosen.push(w); }
       if (chosen.length < 6) {
         const s = shuffle(secondaryCandidates.slice());
-        for (const w of s) { if (chosen.length===6) break; if (!chosen.includes(w)) chosen.push(w); }
+        for (const w of s) { if (chosen.length===5) break; if (!chosen.includes(w)) chosen.push(w); }
       }
       if (chosen.length < 6) {
         const rest = shuffle(allWords.slice());
-        for (const w of rest) { if (chosen.length===6) break; if (!chosen.includes(w)) chosen.push(w); }
+        for (const w of rest) { if (chosen.length===5) break; if (!chosen.includes(w)) chosen.push(w); }
       }
-      return chosen.slice(0,6).map(w => ({ word: w }));
+      return chosen.slice(0,5).map(w => ({ word: w }));
     }
 
     function renderTiles(items){
@@ -168,14 +168,33 @@
 
         details.appendChild(back);
         grid.appendChild(details);
+
+        // allow closing an open tile by clicking anywhere inside it
+        // (ignore clicks on the summary or interactive elements like links/buttons)
+        details.addEventListener('click', (ev) => {
+          if (!details.open) return;
+          const target = ev.target;
+          if (target.closest('summary')) return;
+          if (target.closest('a, button')) return;
+          details.open = false;
+        });
       }
     }
 
     // enable Go wander only if at least one primary candidate exists (prefer >=3-lang coincidences)
     const hasPrimary = primaryCandidates.length > 0;
-    if (!hasPrimary) setStatus("No words found that appear in 3+ languages — Go wander will still try.");
-    else setStatus("Ready. Click Go wander to surface words with coincidences across 3+ languages.");
+    if (!hasPrimary) setStatus("No words found that appear in 3+ languages — showing random words.");
+    else setStatus("Ready. Showing a random selection — click Go wander for new results.");
     goBtn.disabled = false;
+
+    // initial render: show randomized tiles as soon as DB finishes loading
+    try {
+      const initialItems = pickRandomWords();
+      renderTiles(initialItems);
+      setStatus("Tap a tile to reveal IPA and meanings. Click Go wander for new results.");
+    } catch (e) {
+      console.warn('Could not render initial tiles:', e);
+    }
 
     goBtn.addEventListener("click", ()=>{
       setStatus("Generating words…");
