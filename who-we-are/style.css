@@ -1,0 +1,74 @@
+/* Page-specific styles for who-we-are hero and minor layout tweaks */
+
+.who-hero {
+  position: relative;
+  width: 100%;
+  /* make the hero cover half the viewport height */
+  height: 50vh;
+  min-height: 280px;
+  max-height: 520px;
+  overflow: hidden;
+}
+
+.who-hero .hero__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* show the bottom of the image so its lower part is visible */
+  object-position: center bottom;
+}
+
+.who-hero .hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(251,250,247,0.02),
+    rgba(251,250,247,0.06)
+  );
+  pointer-events: none;
+}
+
+/* Ensure the opening section sits close below the hero so it's visible
+   on first navigation without scrolling */
+.opening-section {
+  margin-top: 0;
+  /* tighten the vertical gap so the opening appears sooner */
+  padding: 0.6rem 1.5rem 0 1.5rem;
+}
+
+/* Slightly tighten the opening title and lede to match root scaling */
+.opening-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+  margin-bottom: 0.5rem;
+}
+
+.opening-content {
+  max-width: var(--content);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.opening-section .about-content {
+  max-width: min(var(--content), 60ch);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.opening-section .about-content p {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin-top: 0.25rem;
+}
+
+/* Thin decorative accent under the hero */
+.hero-accent {
+  width: 100%;
+  /* ~0.5cm visually; provide px fallback */
+  height: 0.5cm;
+  min-height: 16px;
+  max-height: 28px;
+  background: #5b3a2e; /* chocolate tone that sits with the paper background */
+}
