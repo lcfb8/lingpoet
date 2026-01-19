@@ -116,11 +116,30 @@ async function loadLanguages() {
     try {
         if (!db) return;
 
-        const result = db.exec("SELECT entries FROM spelling_matches");
         const langCounts = new Map();  // lang -> count of coincidences
 
-        if (result.length > 0) {
-            const rows = result[0].values;
+        // Count from spelling matches
+        const spellingResult = db.exec("SELECT entries FROM spelling_matches");
+        if (spellingResult.length > 0) {
+            const rows = spellingResult[0].values;
+            for (const row of rows) {
+                try {
+                    const entries = JSON.parse(row[0]);
+                    for (const entry of entries) {
+                        if (entry.lang) {
+                            langCounts.set(entry.lang, (langCounts.get(entry.lang) || 0) + 1);
+                        }
+                    }
+                } catch (e) {
+                    // Skip invalid JSON
+                }
+            }
+        }
+
+        // Count from pronunciation matches
+        const pronResult = db.exec("SELECT entries FROM pronunciation_matches");
+        if (pronResult.length > 0) {
+            const rows = pronResult[0].values;
             for (const row of rows) {
                 try {
                     const entries = JSON.parse(row[0]);
