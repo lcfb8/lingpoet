@@ -1,7 +1,7 @@
 /* Wander page interactive functionality */
 
 (async function () {
-  const DB_URL = "../data/coincidences.db";
+  const DB_URL = "https://raw.githubusercontent.com/lcfb8/lingpoet-data/main/coincidences_1_19.db.gz";
   const GLOSS_OVERLAP_THRESHOLD = 0.10; // 10% - match the Python threshold
   const statusEl = document.getElementById("status");
   const goBtn = document.getElementById("go-wander");

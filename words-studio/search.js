@@ -15,7 +15,7 @@ let currentExploreResults = [];  // Store results for CSV download
 
 const TOP_300_COUNT = 300;
 
-const DB_URL = '../data/coincidences.db';
+const DB_URL = 'https://raw.githubusercontent.com/lcfb8/lingpoet-data/main/coincidences_1_19.db.gz';
 
 // IPA normalization (same logic as Python version)
 const IPA_MAP = {
