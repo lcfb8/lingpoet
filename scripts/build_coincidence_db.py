@@ -4,6 +4,11 @@ Build coincidences.db from words.db.
 Filtering criteria (to emphasize accidental matches, not loanwords/related roots):
 - Minimum languages per match: at least 2 distinct languages (MIN_LANGS).
 - Gloss overlap filter: remove groups whose average gloss token overlap >= GLOSS_THRESHOLD.
+  * GLOSS_THRESHOLD = 0.10 (10%) - Updated from 0.35->0.15->0.10 to aggressively filter out
+    words with even minimal semantic overlap (e.g., abbasside shares "Abbasid" reference).
+  * Uses Jaccard similarity on gloss tokens (words > 2 chars, lowercase, alphabetic only).
+  * Excludes common stop words (the, and, for, etc.) to avoid false positives.
+  * Calculates average overlap across all language pairs in the group.
 - Remove entries with disallowed punctuation (anything except letters, digits, - and ').
 - Remove multi-word entries (any whitespace).
 - Remove entries whose primary gloss contains "alternative form of".
@@ -37,17 +42,30 @@ from itertools import combinations
 SOURCE_DB = "data/words.db"
 TARGET_DB = "data/coincidences.db"
 LEXICAL_SIMILARITY_CSV = "lexical_similarity.csv"
-GLOSS_THRESHOLD = 0.35
+GLOSS_THRESHOLD = 0.10  # Lowered from 0.35->0.15->0.10 to filter words with even minimal semantic overlap
 MIN_LANGS = 2
 BATCH_LIMIT = 10000
 
 ALLOWED_WORD_CHARS = set("-'")
 
+# Common English stop words that don't indicate semantic similarity
+STOP_WORDS = {
+    'the', 'and', 'for', 'are', 'was', 'were', 'has', 'have', 'had',
+    'with', 'from', 'that', 'this', 'these', 'those', 'than', 'then',
+    'such', 'when', 'where', 'what', 'which', 'who', 'whom', 'whose',
+    'been', 'being', 'does', 'did', 'will', 'would', 'could', 'should',
+    'may', 'might', 'must', 'can', 'its', 'not', 'but', 'all', 'any',
+    'some', 'each', 'every', 'both', 'few', 'more', 'most', 'other',
+    'into', 'through', 'during', 'before', 'after', 'above', 'below',
+    'between', 'under', 'again', 'further', 'once', 'here', 'there',
+    'also', 'only', 'own', 'same', 'very', 'just', 'now', 'used'
+}
+
 def tokenize_gloss(text):
     if not text:
         return set()
     tokens = re.findall(r"[a-zA-Z]+", text.lower())
-    return {t for t in tokens if len(t) > 2}
+    return {t for t in tokens if len(t) > 2 and t not in STOP_WORDS}
 
 def has_disallowed_punctuation(word):
     if not word:
