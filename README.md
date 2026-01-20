@@ -5,7 +5,7 @@ A project created by lcfb8 and aullanisa for DPI-691M: Programming and Data for 
 
 ---
 
-## 🎯 Project Goal (aka the Secret Master Plan)
+## 🎯 Project Goals
 This project exists to lure **language nerds, poets, and curious internet wanderers** into playing with words - purely for fun…  
 *and then surprise them with learning.*
 
@@ -26,17 +26,17 @@ Under the hood, this project:
 - Filters words that share *coincidences* across languages
 - Turns those coincidences into two playful tools:
 
-### Word Studio
+### Words Studio
 A language exploration playground where users can:
 - Browse word coincidences  
 - Jump between languages  
 - Let curiosity drive the journey
 
 ### Go Wander
-A randomized word quiz that challenges users to:
+A randomized word game that challenges users to:
 - Guess meanings  
 - Make connections  
-- Get confidently wrong *(the best way to learn)*
+- Explore the unexpected
 
 ---
 
