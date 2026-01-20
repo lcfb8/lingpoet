@@ -3,20 +3,14 @@
 /* Peek tiles */
 .peek-grid {
   display: grid;
-
-  /* slightly wider fixed columns but allow them to shrink if necessary */
-  grid-template-columns: repeat(3, minmax(0, 220px));
-  grid-auto-rows: auto;
-  gap: 2rem;
+  /* Desktop: 3 columns (2 rows of 3 tiles) */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
   margin: 2rem auto;
-  max-width: 980px;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  margin: 2rem 0;
   padding-bottom: 0.5rem;
   padding-inline: 0.75rem;
-  max-width: 980px; /* constrain overall grid so it doesn't overflow the page */
+  max-width: 980px;
+  align-items: start; /* Prevent tiles from stretching to match tallest tile */
 }
 
 /* Narrow gutters wrapper used only for Sneak peek + Quirky fun fact */
@@ -50,11 +44,10 @@
 .peek {
   position: relative;
   cursor: pointer;
-  /* fixed tile height so all tiles match */
-  height: 100px;
+  /* Let tile height adjust to content, but set a min-height */
+  min-height: 120px;
   box-sizing: border-box;
-  /* fixed width so every tile is identical */
-  width: 220px;
+  /* Remove fixed width to allow responsive sizing */
 }
 
 .peek__front {
@@ -77,6 +70,7 @@
 }
 
 .peek__word {
+  font-family: 'Cormorant Garamond', serif;
   font-size: 1.5rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
@@ -100,6 +94,16 @@
   height: auto;
   box-sizing: border-box;
   overflow: visible;
+}
+
+.peek__back-word {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border, #ddd);
 }
 
 /* Only show one side at a time so the tile height stays fixed */
@@ -267,7 +271,13 @@
 }
 
 /* Responsive */
+/* Tablet: 2 columns (3 rows of 2 tiles) */
 @media (max-width: 768px) {
+  .peek-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
   .pairs-row {
     grid-template-columns: 1fr;
   }
@@ -281,20 +291,24 @@
   .pairs-cell:last-child {
     border-bottom: none;
   }
+}
 
+/* Mobile: 1 column (6 rows of 1 tile) */
+@media (max-width: 520px) {
   .peek-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
 
   .peek {
-    width: 200px;
-    height: 220px;
+    min-height: 100px;
   }
-}
 
-@media (max-width: 520px) {
-  .peek-grid {
-    grid-template-columns: 1fr;
+  .peek__front {
+    padding: 1rem;
+  }
+
+  .peek__back {
+    padding: 1rem;
   }
 }
