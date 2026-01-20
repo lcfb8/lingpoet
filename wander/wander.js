@@ -170,15 +170,6 @@
       }
     }
 
-    // candidates: words present in >=3 distinct languages
-    const primaryCandidates = Object.entries(byWord).filter(([w,v]) => v.langs.size >= 3).map(([w]) => w);
-    // secondary: >=2 languages
-    const secondaryCandidates = Object.entries(byWord).filter(([w,v]) => v.langs.size === 2).map(([w]) => w);
-    // fallback: any word
-    const allWords = Object.keys(byWord);
-
-    function shuffle(a){ for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
-
     // Check if a word uses Latin script (basic Latin alphabet characters)
     function isLatinScript(word) {
       if (!word) return false;
@@ -196,6 +187,15 @@
       }
       return true; // Non-Latin scripts have no restriction
     }
+
+    function shuffle(a){ for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
+
+    // candidates: words present in >=3 distinct languages AND meet length requirement
+    const primaryCandidates = shuffle(Object.entries(byWord).filter(([w,v]) => v.langs.size >= 3 && meetsLengthRequirement(w)).map(([w]) => w));
+    // secondary: >=2 languages AND meet length requirement
+    const secondaryCandidates = shuffle(Object.entries(byWord).filter(([w,v]) => v.langs.size === 2 && meetsLengthRequirement(w)).map(([w]) => w));
+    // fallback: any word that meets length requirement
+    const allWords = shuffle(Object.keys(byWord).filter(w => meetsLengthRequirement(w)));
 
     function pickRandomWords() {
       const chosen = [];
@@ -248,10 +248,16 @@
         const back = document.createElement("div");
         back.className = "peek__back";
 
+        // Add the word at the top of the back
+        const backWordSpan = document.createElement("div");
+        backWordSpan.className = "peek__back-word";
+        backWordSpan.textContent = it.word || "—";
+        back.appendChild(backWordSpan);
+
         const info = byWord[it.word] || { rows: [], langs: new Set() };
         const langs = Array.from(info.langs).slice(0,3);
         if (langs.length === 0) {
-          back.innerHTML = "<p class='muted'>No entries found for this word.</p>";
+          back.innerHTML += "<p class='muted'>No entries found for this word.</p>";
         } else {
           for (const lang of langs) {
             const rows = info.rows.filter(r => String(r.language) === String(lang));
