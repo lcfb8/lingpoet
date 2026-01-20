@@ -1,6 +1,8 @@
 # lingpoet
-*Play with words. Get lost in languages. Accidentally learn something*
+***Play with words. Get lost in languages. Accidentally learn something***<br>
+
 A project created by lcfb8 and aullanisa for DPI-691M: Programming and Data for Policymakers at Harvard Kennedy School, January 2026.
+
 ---
 
 ## 🎯 Project Goal (aka the Secret Master Plan)
