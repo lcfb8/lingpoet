@@ -1,4 +1,4 @@
-# lingpoet
+# lingpoet: https://lcfb8.github.io/lingpoet/
 ***Play with words. Get lost in languages. Accidentally learn something***<br>
 
 A project created by lcfb8 and aullanisa for DPI-691M: Programming and Data for Policymakers at Harvard Kennedy School, January 2026.
