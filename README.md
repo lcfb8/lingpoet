@@ -63,6 +63,7 @@ We keep things transparent, structured, and mildly organized. Let me take you th
 2. 🧭 [**Sprint Board 1**](https://github.com/users/lcfb8/projects/2)
 3. 🧭 [**Sprint Board 2**](https://github.com/users/lcfb8/projects/3)
 4. 📉 [**Burndown Chart**](https://docs.google.com/spreadsheets/d/10H3zeNvtlZoBsKQ0yDg6T-M1QOfdXoA-tc17_60-PR0/edit?gid=87021041#gid=87021041)
+3. ⛁ [**Where Our Database Lives**](https://github.com/users/lcfb8/projects/3)](https://github.com/lcfb8/lingpoet-data)
 
 ---
 
